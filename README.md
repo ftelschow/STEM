@@ -1,1 +1,0 @@
-# fmri-peak-detection
