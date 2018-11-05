@@ -10,7 +10,7 @@
 %__________________________________________________________________________
 % Author: Fabian Telschow (ftelschow@ucsd.edu)
 %
-% Last changes: 06/22/2018
+% Last changes: 05/11/2018
 %__________________________________________________________________________
 % Depends on:
 %       - SmoothField3D.m
@@ -27,37 +27,33 @@
 clear all
 close all
 
-% subject
-subj =  'moran'; %'INV02EBX0JJ_2'; % 'INV02EBX0JJ'; % 'INV1EZ26N40_2'; % 'INV1EZ26N40'; %
+% Please make sure you are in the STEM folder to run the script
+% appropriately
+cd '/home/drtea/Research/MatlabPackages/STEM'
 
-% define file paths
-% put here the folder you saved the scripts
-workpath       = 'C:\Users\ftelschow\Dropbox\ShareWithArmin\PeakDetectionCode';
-% path = C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection;
+% Create directories
+mkdir tmp
+mkdir pics
+mkdir mask
 
-path_tmp   = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\tmp\';
-path_mask  = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\';
-path_pics  = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\pics\';
-path_data  = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\';
+% define path variables
+path_tmp   = 'tmp/';
+path_mask  = 'mask/';
+path_pics  = 'pics/';
+path_data  = 'data/';
 
-cd(workpath)
-
-% load data
-if strcmp(subj, 'moran')
-    % Load Moran data
-    load('data\sub049_regr_data_fwhm0.mat')
-    Y    = double(regr_data.fMRI);
-    mask = regr_data.mn_mask > 0;
-    X    = regr_data.X;
-    c    = regr_data.c;
-else
-    load( strcat('data\taskFMRI_PeakPaperExample_',subj,'.mat') )
-end
+% Load Moran data
+load( strcat(path_data,'sub049_regr_data_fwhm0.mat'))
+Y    = double(regr_data.fMRI);
+mask = regr_data.mn_mask > 0;
+X    = regr_data.X;
+c    = regr_data.c;
 
 % Set graphic parameter
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
 names_methods =     {'ExactGauss_Kappa1', 'ExactGauss_KappaEst', 'SPM', 'Chumbley', 'Adler'};
 clear stats_don fitts_don beta_don residuals_don
+
 %% Get constants from the data set
 n  = size(X, 1);
 sY = size(mask); 
@@ -65,19 +61,20 @@ df = n - rank(X);
 D  = length(sY);
 
 % Processing choices
-smoothT    = 1;
-smoothData = 0;
-FWHM = 2.335*1.6;
+smoothT    = 0;
+smoothData = 1;
+FWHM       = 4; %2.335*1.6;
 
 %% %%%% Preprocessing before data and compute T statistic
 % plot data
 figure(1)
-imagesc(Y(:,:,30,100)); axis square
+imagesc(Y(:,:,22,100)); axis square
 colorbar;
 set(gca,'FontSize',20)
 set(findall(gcf,'type','text'),'FontSize',20)
 
-% smooth fitts using FWHM = 3 and plot smoothed data
+% smooth fitts using spm_smooth with Gaussian kernel with specified FWHM
+% and plot smoothed data
 if smoothData
     tic
     Ys = smoothfMRIvolume(Y, FWHM);
@@ -87,6 +84,15 @@ if smoothData
 else
     Ys = Y;
 end
+
+% remove zeros from the boundaries to make pics look more pretty later
+cut1 = 11:sY(1)-10;
+cut2 = 9:sY(1)-8;
+cut3 = 1:34;
+
+Ys   = Ys(cut1, cut2, cut3, :);
+mask = mask(cut1, cut2, cut3);
+sY = size(mask);
 
 % fit GLM to the data
 [betahat, fitts, residuals, sigma2hat, df, T] = fitGLM2fMRIvolume(Ys, X, c);
@@ -116,6 +122,8 @@ if smoothT
         SmoothedResiduals(:,:,:,i) = SmoothedResiduals(:,:,:,i) ./ hatSigmaSmooth;
      end
  clear i
+else
+    SmoothedResiduals = residuals;
 end
 
 T(~mask) = 0;
@@ -152,7 +160,7 @@ tmp(~mask2) = 0;
 subplot(2,3,4), imagesc(tmp(:,:,30)), colorbar;
 subplot(2,3,5), imagesc(tmp(:,:,20)), colorbar;
 subplot(2,3,6), imagesc(tmp(:,:,25)), colorbar;
-clear mask2 tmp
+clear mask2 tmp Ioutlier 
 %% % Estimate kappa not yet estimated from data
 kappa_est     = estim_kappa( SmoothedResiduals, mask, [1 1 1], df); 
 kappa         = 1;
@@ -161,7 +169,11 @@ kappa         = 1;
 % transform data into a NIFTI file in order to process it in SPM
 for j = 1:n
     nii_img = make_nii( residuals(:,:,:,j) );
-    save_nii(nii_img, strcat(path_tmp,num2str(j),'im.nii' ));
+    if j<100
+        save_nii(nii_img, strcat(path_tmp,'0',num2str(j),'im.nii' ));
+    else
+        save_nii(nii_img, strcat(path_tmp,num2str(j),'im.nii' ));
+    end
 end
 clear j
 
@@ -171,14 +183,14 @@ names = names(3:end);
 
 % save the mask as nii files
 nii_img = make_nii(double(mask) );
-save_nii(nii_img, strcat(path_mask, 'mask.nii' ));
+save_nii(nii_img, strcat(path_mask,'mask.nii') );
 clear nii_img 
 
 % Estimate resels using SPM
 cd(path_tmp)
-[~,~,R] = spm_est_smoothness( char(names), strcat(path_mask, 'mask.nii' ), [n df]);
+[~,~,R] = spm_est_smoothness( char(names), strcat('/home/drtea/Research/MatlabPackages/STEM/mask/mask.nii' ), [n df]);
 clear dinfo names
-cd(workpath)
+cd ..
 
 %% %%%%%%%%%%%%%% Peak Detection analysis
 % Compute the p-values
@@ -200,10 +212,10 @@ for u = 1:length(Vvec)
     % compute pValue table of the distribution of the overshoot.
     pValueTable = PvalueTable_heightDistr( D, kappa, 1e-3, -3, 7);
     pValueTable(:,2) = pValueTable(:,2) / pValueTable(find(pValueTable(:,1) >=v, 1, 'first'), 2);
-    Ps1       = Table_peakFDR( ts, 3, v, 0.05, pValueTable, loc );
+    Ps1       = Table_peakFDR( -norminv(tcdf(-ts, df)), 3, v, 0.05, pValueTable, loc );
     pValueTable = PvalueTable_heightDistr( D, kappa_est, 1e-3, -3, 7);
     pValueTable(:,2) = pValueTable(:,2) / pValueTable(find(pValueTable(:,1) >=v, 1, 'first'), 2);    
-    Ps2       = Table_peakFDR( ts, 3, v, 0.05, pValueTable, loc );   
+    Ps2       = Table_peakFDR( -norminv(tcdf(-ts, df)), 3, v, 0.05, pValueTable, loc );   
     Ps3       = SPM_peakFDR( 0.05, [df df], 'T', R, 1, ts, v, loc );
     Ps4       = Chumbley_peakFDR( ts, D, v, 0.05, 'T', df, loc );
     Ps5       = Adler_peakFDR( ts, D, v, 0.05, loc );
@@ -239,15 +251,12 @@ for u = 1:length(Vvec)
     Idetect{u}  = [ Idetect1 Idetect2 Idetect3 Idetect4 Idetect5];
 end
 
-clear Idetect1 Idetect2 Idetect3 Idetect4 Fi S Ps1 Ps2 Ps3 Ps4 pValueTable v u ts loc
+clear Idetect1 Idetect2 Idetect3 Idetect4 Idetect5 Fi S Ps1 Ps2 Ps3 Ps4 Ps5 pValueTable v u ts loc
 
-if ~strcmp(subj, 'moran')
-    mY = mean(Y, 4).*mask;
-else
-    mY = regr_data.mn_mask;
-end
-save( strcat(path_data,'SmoothT_Analysis_', subj, '_FWHM_',num2str(FWHM),'.mat'), ...
-      'kappa_est', 'R', 'Idetect', 'Ps', 'Ts', 'Loc' ,'c', 'Vvec', 'FWHM', 'smoothData', 'smoothT', 'subj', 'T', 'mask', 'mY' )
+mY = regr_data.mn_mask(cut1,cut2,cut3,:);
+
+save( strcat(path_data,'AnalysisMoran_FWHM_',num2str(FWHM),'.mat'), ...
+      'kappa_est', 'R', 'Idetect', 'Ps', 'Ts', 'Loc' ,'c', 'Vvec', 'FWHM', 'smoothData', 'smoothT', 'T', 'mask', 'mY' )
 
 %% Plot the results
  for u =1:length(Vvec)
@@ -264,44 +273,66 @@ save( strcat(path_data,'SmoothT_Analysis_', subj, '_FWHM_',num2str(FWHM),'.mat')
     ll      = Loc{u};
     ll      = ll(1:II);
     heights = Ts{u};
-
-    thresh  = heights(II);
-
-    T_thresh = T.*(T >= thresh)./(T >= thresh);
-    figure; clf; hold on;
-    RGB = anatomy(T_thresh, mY, [], 'hot');
-    montage(permute(RGB, [1 2 4 3])), axis xy
-
+    
+    % compute 3D index from 1D index
     smask_valid = sY;
     [Ix,Iy,Iz] = ind2sub(smask_valid, ll);
-    if strcmp(subj, 'moran')
-        m = 6;
+    % threshold the T map using the prethreshold Vvec(u)
+    if u > 1
+        thresh  = Vvec(u); %heights(II);
     else
-        m = 8;
+         thresh  = heights(II)*0.9;
     end
-    for i = 1:length(ll),
-        if mod(Iz(i),m)>0,
-        Iy_montage(i) = floor(Iz(i)/m)*smask_valid(1) + Ix(i);
-        Ix_montage(i) = (mod(Iz(i), m) - 1)*smask_valid(2) + Iy(i);
+        
+    T_thresh = T.*(T >= thresh)./(T >= thresh);
+    % set parameters for montage
+    if u > 2
+        m = 4; % m x m montage
+        spt = min(Iz)-1;
+        ept = spt+m^2-1;
+    else
+        m = 5; % m x m montage
+        spt = 6;
+        ept = spt+m^2-1;
+    end
+   Ix = Ix( Iz >= spt & Iz<=ept );
+   Iy = Iy( Iz >= spt & Iz<=ept );    
+   Iz = Iz( Iz >= spt & Iz<=ept );
+
+    % Output a warning if not all peaks are contained in the montage
+    if( max(Iz)>ept )
+        warn = "Not all signifikant peaks are shown!"
+    end
+    figure; clf; camroll(270); hold on;
+    RGB = anatomy(T_thresh(:,:,spt:ept), mY(:,:,spt:ept), [], 'hot');
+    montage(permute(RGB, [1 2 4 3]), 'Size', [m m], 'ThumbnailSize',sY(1:2)), axis xy
+
+    hold on;    
+    
+    for i = 1:length(Iz)
+        if mod(Iz(i)-(spt-1),m)>0
+            Iy_montage(i) = floor((Iz(i)-(spt-1))/m)*smask_valid(1) + Ix(i);
+            Ix_montage(i) = (mod((Iz(i)-(spt-1)), m) - 1)*smask_valid(2) + Iy(i);
         else
-        Iy_montage(i) = (Iz(i)/m -1)*smask_valid(1) + Ix(i);
-        Ix_montage(i) = (m-1)*smask_valid(2) + Iy(i);
+            Iy_montage(i) = ((Iz(i)-(spt-1))/m -1)*smask_valid(1) + Ix(i);
+            Ix_montage(i) = (m-1)*smask_valid(2) + Iy(i);
         end
     end
     hold on
-    plot(Ix_montage, Iy_montage, '^c')
+    plot(Ix_montage, Iy_montage, '^b', 'LineWidth',1.2)
     hold off
-    clear Ix_montage Iy_montage m Iz RGB smask_valid
-   saveas( gcf, strcat(path_pics,'activation_SmoothT_',subj, '_FWHM_',num2str(FWHM),'_thresh_',num2str(Vvec(u)),'_',names_methods{methodNr},'.png') )
+    clear Ix_montage Iy_montage m Iz RGB smask_valid Ix Iy ll II
+    saveas( gcf, strcat(path_pics,'activationMoran_SmoothT',num2str(smoothT),'_SmoothData', num2str(smoothData), '_FWHM_',num2str(FWHM),'_thresh_',num2str(Vvec(u)),'_',names_methods{methodNr},'.png') )
     end
  end
-%% Get the height thresholds from SPM
-clear all
-path_data  = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\';
-subj   =  'moran';% 'INV02EBX0JJ'; % 'INV1EZ26N40'; % 'INV02EBX0JJ_2'; % 'INV1EZ26N40_2'; %
-FWHM = 3.736;
-% subject
-load( strcat(path_data,'Analysis_',subj, '_FWHM_',num2str(FWHM),'.mat') )
+ clear i spt ept NN1 NN2 u m methodNr
+%% Get the tables from the article
+% clear all
+% path_data  = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\';
+% subj   =  'moran';% 'INV02EBX0JJ'; % 'INV1EZ26N40'; % 'INV02EBX0JJ_2'; % 'INV1EZ26N40_2'; %
+% FWHM = 3.736;
+% %subject
+% load( strcat(path_data,'Analysis_',subj, '_FWHM_',num2str(FWHM),'.mat') )
 
 % Generate critical heights and critical p-values
 criticalHeights = zeros( [5 4] );

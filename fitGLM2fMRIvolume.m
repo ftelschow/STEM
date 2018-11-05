@@ -13,8 +13,8 @@ function [betahat, fitts, residuals, sigma2hat, df, T] = fitGLM2fMRIvolume(Y, X,
 %   betahat    -  array with the same dimensions as the spatial part of Y
 %                 containing the beta coeficients
 %   fitts      -  array of the same size as Y giving the GLM fitt
-%   residuals  -  array of the same size as Y containing the residuals of 
-%                 the GLM fitt
+%   residuals  -  array of the same size as Y containing the normalized
+%                 residuals of the GLM fitt
 %   df         -  degrees of freedom of GLM
 %   T          -  Wald statistic field for contrast c
 %__________________________________________________________________________

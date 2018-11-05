@@ -1,5 +1,5 @@
 function f = SmoothField3D( n, nsim, stddev, dim, noise, nu,...
-    kernel, bin, pool_num )
+                            kernel, bin, pool_num )
 %__________________________________________________________________________
 % Generates stationary, isotropic or nonstationary Gaussian and non-Gaussian
 % random fields with mean zero and variance one (if no binning is used)
@@ -19,10 +19,10 @@ function f = SmoothField3D( n, nsim, stddev, dim, noise, nu,...
 %                 't'       = degrees of freedom
 %                 'uniform' = half length of interval
 %   kernel   -  options 'gauss' and 'quartic' and 't-density'
-%   bin      -  2x6 matrix allowing to bin parts of the cube to produce
+%   bin      -  2x3 matrix allowing to bin parts of the cube to produce
 %               non-stationary noise. Note that we need bin(1,i)*bin(2,i) < dim(i)
 %   pool_num -  number of GPUs used for parallizing, must be greater than 1
-%               open
+%               to enable.
 %
 % Output:
 %   f        -  Array of size dim x n x nsim
@@ -30,7 +30,7 @@ function f = SmoothField3D( n, nsim, stddev, dim, noise, nu,...
 % References:
 %__________________________________________________________________________
 % Author: Fabian Telschow (ftelschow@ucsd.edu)
-% Last changes: 06/19/2018
+% Last changes: 10/22/2018
 %___________________________________________________________
 %
 % Start of function
@@ -63,7 +63,7 @@ end
 state_gcp = isempty(gcp('nocreate'));
 
 % open connection to GPUs, if not already established
-if( state_gcp && pool_num > 1 )  , 
+if( state_gcp && pool_num > 1 ) 
     parpool( pool_num );
     state_gcp = 42;
 end
@@ -74,7 +74,7 @@ d2    = dim(2);
 d3    = dim(3);
 
 % obtain parameters for smoothing
-if strcmp(kernel, 'gauss'),
+if strcmp(kernel, 'gauss')
     % paramter for smoothing with spm_smooth, convert std into FHWM
     smo  = stddev*2*sqrt(2*log(2));
     % numbers of zeros to be padded to each side (heuristic 4*std)
@@ -86,7 +86,7 @@ if strcmp(kernel, 'gauss'),
     % need to specify this, since parfor otherwise does not work, I don't
     % know why...    
     h = 0;
-elseif strcmp(kernel,'quartic'),
+elseif strcmp(kernel,'quartic')
     % pre-compute the filter for smoothing using quatric kernel
     % stddev is half amount of voxels
 %     h1 = quartic_kernel( (-(stddev(1)-1):(stddev(1)-1) ) / stddev(1) );
@@ -124,11 +124,11 @@ clear pad;
 
 % Define the noise function for generating od the random numbers which get
 % smoothed
-if strcmp( noise, 'normal' ),
+if strcmp( noise, 'normal' )
     rnumber = @randn;
-elseif strcmp( noise, 't' ),
+elseif strcmp( noise, 't' )
     rnumber = @(x) trnd(nu,x) / sqrt(nu/(nu-2));
-elseif strcmp( noise, 'uniform' ),
+elseif strcmp( noise, 'uniform' )
     rnumber = @(x) 2*(rand(x) -0.5) * sqrt(3);
 else
     error('Error: Please, choose noise from the available options "normal", "t" or "uniform"!')
@@ -139,17 +139,17 @@ end
 f = zeros( [dim n nsim] );
 
 % fill the field with realisations
-if pool_num > 1,
-    for i=1:nsim,
-        parfor j=1:n,
+if pool_num > 1
+    for i=1:nsim
+        parfor j=1:n
             % initialize the output for SPM
             Noises = zeros(cdim);
             % noise for stationary field
             raw_noise = rnumber(cdim);
             % create noise field for smoothing
-            if ~all( bin==0 ),
+            if ~all( bin==0 )
                 % Check whether the binnin input is valid
-                if bin(1,1)*bin(2,1) <= d1 && bin(1,2)*bin(2,2) <= d2 && bin(1,3)*bin(2,3) <= d3,
+                if bin(1,1)*bin(2,1) <= d1 && bin(1,2)*bin(2,2) <= d2 && bin(1,3)*bin(2,3) <= d3
                     %%% bin inside the box defined by bin(1,i)*bin(2,i)
                     bin_rnd = repelem(randn(bin(1,1:3)), bin(2,1), bin(2,2), bin(2,3));
                     dBin = size(bin_rnd);
@@ -160,9 +160,9 @@ if pool_num > 1,
                 end
             end
             % create the smoothed realisation of the field
-            if strcmp(kernel, 'gauss'),
+            if strcmp(kernel, 'gauss')
                     spm_smooth( raw_noise, Noises, smo );
-            elseif strcmp(kernel, 'quartic'),
+            elseif strcmp(kernel, 'quartic')
                     Noises = convn(raw_noise, h, 'same');
             end
 
@@ -173,14 +173,14 @@ if pool_num > 1,
 else
     % initialize the output for SPM
     Noises = zeros(cdim);
-    for i=1:nsim,
-        for j=1:n,
+    for i=1:nsim
+        for j=1:n
             % noise for stationary field
             raw_noise = rnumber(cdim);
             % create noise field for smoothing
-            if ~all( bin==0 ),
+            if ~all( bin==0 )
                 % Check whether the binnin input is valid
-                if bin(1,1)*bin(2,1) <= d1 && bin(1,2)*bin(2,2) <= d2 && bin(1,3)*bin(2,3) <= d3,
+                if bin(1,1)*bin(2,1) <= d1 && bin(1,2)*bin(2,2) <= d2 && bin(1,3)*bin(2,3) <= d3
                     %%% bin inside the box defined by bin(1,i)*bin(2,i)
                     bin_rnd = repelem(randn(bin(1,1:3)), bin(2,1), bin(2,2), bin(2,3));
                     dBin = size(bin_rnd);
@@ -191,9 +191,9 @@ else
                 end
             end
             % create the smoothed realisation of the field
-            if strcmp(kernel, 'gauss'),
+            if strcmp(kernel, 'gauss')
                  spm_smooth( raw_noise, Noises, smo );
-            elseif strcmp(kernel, 'quartic'),
+            elseif strcmp(kernel, 'quartic')
                 Noises = convn(raw_noise, h, 'same');
             end
             

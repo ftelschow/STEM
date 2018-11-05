@@ -1,0 +1,29 @@
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+                                  & height & v_2 & v_25 & v_3 \\\hline
+Exact, $\kappa=0.577$ (estimated) & 32     & 8   & 6    & 7   \\\hline
+Exact, $\kappa=1$ (fixed)         & 9      & 5   & 5    & 6   \\\hline
+Adler                             & 0      & 7   & 6    & 7   \\\hline
+Chumbley                          & 0      & 5   & 5    & 6   \\\hline
+SPM                               & 0      & 5   & 5    & 7   \\\hline
+\end{tabular}
+\caption{MyTableCaption}
+\label{table:MyTableLabel}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+                                  & height  & v_2   & v_25 & v_3  \\\hline
+Exact, $\kappa=0.577$ (estimated) & 2.85    & 3.99  & 4.20 & 4.09 \\\hline
+Exact, $\kappa=1$ (fixed)         & 3.84    & 4.85  & 4.85 & 4.20 \\\hline
+SPM                               & 0.00    & 4.85  & 4.85 & 4.09 \\\hline
+Chumbley                          & 0.00    & 4.85  & 4.85 & 4.20 \\\hline
+Adler                             & 0.00    & 4.09  & 4.20 & 4.09 \\\hline
+\end{tabular}
+\caption{MyTableCaption}
+\label{table:MyTableLabel}
+\end{table}
