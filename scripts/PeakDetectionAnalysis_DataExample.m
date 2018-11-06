@@ -63,7 +63,7 @@ D  = length(sY);
 % Processing choices
 smoothT    = 0;
 smoothData = 1;
-FWHM       = 4; %2.335*1.6;
+FWHM       = 2.335*1.6; %3; %
 
 %% %%%% Preprocessing before data and compute T statistic
 % plot data
@@ -84,15 +84,6 @@ if smoothData
 else
     Ys = Y;
 end
-
-% remove zeros from the boundaries to make pics look more pretty later
-cut1 = 11:sY(1)-10;
-cut2 = 9:sY(1)-8;
-cut3 = 1:34;
-
-Ys   = Ys(cut1, cut2, cut3, :);
-mask = mask(cut1, cut2, cut3);
-sY = size(mask);
 
 % fit GLM to the data
 [betahat, fitts, residuals, sigma2hat, df, T] = fitGLM2fMRIvolume(Ys, X, c);
@@ -192,6 +183,35 @@ cd(path_tmp)
 clear dinfo names
 cd ..
 
+%% % Estimate the FHWM under the assumption it would be smoothed white noise
+% We use table 2 from "Unified univariate and multivariate random field theory" by Keith
+% J. Worsley et all (2004)
+%%%%% Create an alpha shape object from the mask
+% Get linear index of elements in the mask and create alpha shape object
+linearIndex = find(mask(:)==1);
+[Ix,Iy,Iz]  = ind2sub(sY, linearIndex);
+shape         = alphaShape(Ix,Iy,Iz);
+plot(shape)
+% test the indices
+i=14;
+ind = find(Iz==i);
+figure(1); hold on;
+subplot(1,2,1);
+scatter(Iy(ind), Ix(ind))
+subplot(1,2,2)
+imagesc(mask(:,:,i))
+hold off
+
+% compute geometric volumes
+surfvolMask   = surfaceArea(shape);
+volMask       = volume(shape);
+diamMask      = (range(Ix) + range(Iy) + range(Iz))/2; % box approximation of diameter
+
+% Estimate FWHM
+FWHM_est   = [ 1 2*diamMask surfvolMask/2 volMask] ./ R;
+FWHM_est   = [ FWHM_est(2) sqrt(FWHM_est(3)) (FWHM_est(4))^(1/3) ]
+FWHM_est   = mean(FWHM_est);
+
 %% %%%%%%%%%%%%%% Peak Detection analysis
 % Compute the p-values
 T(~mask) = 0;
@@ -259,6 +279,17 @@ save( strcat(path_data,'AnalysisMoran_FWHM_',num2str(FWHM),'.mat'), ...
       'kappa_est', 'R', 'Idetect', 'Ps', 'Ts', 'Loc' ,'c', 'Vvec', 'FWHM', 'smoothData', 'smoothT', 'T', 'mask', 'mY' )
 
 %% Plot the results
+% remove zeros from the boundaries to make pics look more pretty later
+cut1 = 11:sY(1)-10;
+cut2 = 9:sY(1)-8;
+cut3 = 1:34;
+
+Ys   = Ys(cut1, cut2, cut3, :);
+mask = mask(cut1, cut2, cut3);
+sY = size(mask);
+
+
+% Loop over different methods and thresholds
  for u =1:length(Vvec)
     if u==1
         NN1=1;
