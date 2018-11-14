@@ -28,32 +28,29 @@ close all
 
 %%% Set working path
 % local computer
-cd 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection'
-% Dale server
-%cd /home/ftelschow/PeakDetection/
-%cd /space/syn09/1/data/MMILDB/fabian/ErrorFields/
+cd '/home/drtea/Research/MatlabPackages/STEM'
 
 % Decide whether data needs to be pre-computed or is already saved on the 
 % hard drive
 load_data = 0;
 
-%path_data = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\anisoL505030nsim1n10000_stddev2_3_5.mat';
-%path_data = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\CopeSets\L505030Nsim1e5N1_isotropic_nu5';
+%path_data = 'data/isoL505030nsim1n12000_gauss_stddev7.mat';
+path_data = 'data/isoL505030nsim1n12000_gauss_stddev5.mat';
 %path_data = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\isoL505030nsim1n1000_quartic_stddev18.mat';
 
 % Number of GPUs used for parallel computing
-pool_num = 3;
+pool_num = 1;
 
 % General Parameter for simulation
-n        = 1e3;
-nsim     = 1;
+n        = 1;
+nsim     = 1e4;
 cut      = 1;
 
 %%%% Parameters for the noise
 % size of domain
 dim      = [50 50 30];
 % property of covariance structure
-TYPE   =  'isotropic'; %'nonstationary'; % 'anisotropic'; %
+TYPE   =  'nonstationary'; % 'anisotropic'; % 'isotropic'; %
 % Noise type which gets smoothed and parameter for 'uniform' or 't' noise
 noise  = 'normal'; % 'uniform'; % 't'; %
 nu     =   5;
@@ -61,7 +58,7 @@ nu     =   5;
 kernel =  'gauss'; % 'quartic'; %
 
 % sigmas for smoothing kernel
-stddev = [7 7 7];
+stddev = [5 5 5];
 
 if strcmp(TYPE, 'anisotropic')
     stddev = [9 5 7];
@@ -78,28 +75,31 @@ else
     switch TYPE
         case 'isotropic'
             tic
-            f = SmoothField3D(n, nsim, stddev, dim, noise, nu, kernel, 0, 3);
+            f = SmoothField3D(n, nsim, stddev, dim, noise, nu, kernel, 0, pool_num);
             toc
             clear load_data
             % save generated fields for later use
-%             save(['isoL',num2str(dim(1)),num2str(dim(2)),num2str(dim(3)),'nsim'...
-%                 ,num2str(nsim),'n',num2str(n),'_', kernel,'_stddev',num2str(stddev(3)),...
-%                 '.mat'], '-v7.3')
+            save(['data/isoL',num2str(dim(1)),num2str(dim(2)),num2str(dim(3)),'nsim'...
+                ,num2str(nsim),'n',num2str(n),'_', kernel,'_stddev',num2str(stddev(3)),...
+                '.mat'], '-v7.3')
         case 'anisotropic'
             tic
-            [f, LKC] = GaussianSmoothField3D(n, nsim, stddev, dim, noise, nu, kernel, 0, 3);
+            f = SmoothField3D(n, nsim, stddev, dim, noise, nu, kernel, 0, pool_num);
             toc
+            clear load_data
             % save generated fields for later use
-            %save(['C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\anisoL',num2str(dim(1)),num2str(dim(2)),num2str(dim(3)),'nsim'...
-                %,num2str(nsim),'n',num2str(n),'_stddev',num2str(stddev(1)),...
-                %'_',num2str(stddev(2)),'_',num2str(stddev(3)),'.mat'], '-v7.3')
+            save(['data/anisoL',num2str(dim(1)),num2str(dim(2)),num2str(dim(3)),...
+                  'nsim',num2str(nsim),'n',num2str(n),'_stddev',num2str(stddev(1)),...
+                  '_',num2str(stddev(2)),'_',num2str(stddev(3)),'.mat'], '-v7.3')
         case 'nonstationary'
             bin = [[12, 25, 15]; [2, 2, 2]];
-            [f, LKC] = GaussianSmoothField3D(n, nsim, stddev, dim, noise, nu, kernel, bin, 3);
+            f = SmoothField3D(n, nsim, stddev, dim, noise, nu, kernel, bin, pool_num);
+            f = squeeze(f);
             stdf = std(f, 0, length(dim)+1 );
-%             save(['C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\anisoL',num2str(dim(1)),num2str(dim(2)),num2str(dim(3)),'nsim'...
-%             ,num2str(nsim),'n',num2str(n),'_stddev',num2str(stddev(1)),...
-%             '_',num2str(stddev(2)),'_',num2str(stddev(3)),'.mat'], '-v7.3')
+            % save generated fields for later use
+            save(['data/NonStatL',num2str(dim(1)),num2str(dim(2)),num2str(dim(3)),...
+                  'nsim',num2str(nsim),'n',num2str(n),'_stddev',num2str(stddev(1)),...
+                  '_',num2str(stddev(2)),'_',num2str(stddev(3)),'.mat'], '-v7.3')
     end
 end
 %% Compute p-value distribution of height of peaks

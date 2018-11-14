@@ -84,7 +84,7 @@ Msim      = 1e4;       % number of simulations
 kappa     = 1;         % divide lower bound of integral by std in CS method (Y/N)
 FWHM      = stddev(1)*2*sqrt(2*log(2));
 dim1      = dim-1;
-Rt         = [1 sum(dim1)/FWHM ...
+R         = [1 sum(dim1)/FWHM ...
             (dim1(1)*dim1(2)+dim1(1)*dim1(3)+dim1(2)*dim1(3))/FWHM^2 ...
             prod(dim1)/FWHM^3]; % True resels using the formula in K.J. Worsley et al. / NeuroImage 23 (2004) S189�S195
 fieldTYPE = 'T'; %'Z';       %
@@ -125,11 +125,12 @@ dinfo = dir('/home/drtea/Research/MatlabPackages/STEM/tmp');
 names = {dinfo.name};
 names = names(3:end);
 
-% Estimate resels using SPM
+Estimate resels using SPM
 [~,~,R] = spm_est_smoothness( char(names), path_mask, [3000 3000]);
 end
-
 cd(path_STEM);
+
+
 for uu = 1:length(Uvec)
     ui = Uvec(uu);
     % Precompute the p-value Table for exact Gaussian overshoot distribution

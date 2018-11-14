@@ -29,7 +29,6 @@ close all
 
 % Please make sure you are in the STEM folder to run the script
 % appropriately
-cd '/home/drtea/Research/MatlabPackages/STEM'
 
 % Create directories
 mkdir tmp
@@ -63,12 +62,12 @@ D  = length(sY);
 % Processing choices
 smoothT    = 0;
 smoothData = 1;
-FWHM       = 2.335*1.6; %3; %
+FWHM       = 4; %2.335*1.6;
 
 %% %%%% Preprocessing before data and compute T statistic
 % plot data
 figure(1)
-imagesc(Y(:,:,22,100)); axis square
+imagesc(Y(:,:,30,100)); axis square
 colorbar;
 set(gca,'FontSize',20)
 set(findall(gcf,'type','text'),'FontSize',20)
@@ -151,7 +150,7 @@ tmp(~mask2) = 0;
 subplot(2,3,4), imagesc(tmp(:,:,30)), colorbar;
 subplot(2,3,5), imagesc(tmp(:,:,20)), colorbar;
 subplot(2,3,6), imagesc(tmp(:,:,25)), colorbar;
-clear mask2 tmp Ioutlier 
+clear mask2 tmp
 %% % Estimate kappa not yet estimated from data
 kappa_est     = estim_kappa( SmoothedResiduals, mask, [1 1 1], df); 
 kappa         = 1;
@@ -160,11 +159,7 @@ kappa         = 1;
 % transform data into a NIFTI file in order to process it in SPM
 for j = 1:n
     nii_img = make_nii( residuals(:,:,:,j) );
-    if j<100
-        save_nii(nii_img, strcat(path_tmp,'0',num2str(j),'im.nii' ));
-    else
-        save_nii(nii_img, strcat(path_tmp,num2str(j),'im.nii' ));
-    end
+    save_nii(nii_img, strcat(path_tmp,num2str(j),'im.nii' ));
 end
 clear j
 
@@ -174,44 +169,22 @@ names = names(3:end);
 
 % save the mask as nii files
 nii_img = make_nii(double(mask) );
-save_nii(nii_img, strcat(path_mask,'mask.nii') );
+save_nii(nii_img, strcat(path_mask, 'mask.nii' ));
 clear nii_img 
 
 % Estimate resels using SPM
 cd(path_tmp)
-[~,~,R] = spm_est_smoothness( char(names), strcat('/home/drtea/Research/MatlabPackages/STEM/mask/mask.nii' ), [n df]);
+[~,~,R] = spm_est_smoothness( char(names), strcat(path_mask, 'mask.nii' ), [n df]);
 clear dinfo names
-cd ..
+cd(workpath)
 
-%% % Estimate the FHWM under the assumption it would be smoothed white noise
-% We use table 2 from "Unified univariate and multivariate random field theory" by Keith
-% J. Worsley et all (2004)
-%%%%% Create an alpha shape object from the mask
-% Get linear index of elements in the mask and create alpha shape object
-linearIndex   = find(mask(:)==1);
-[Ix,Iy,Iz]    = ind2sub(sY, linearIndex);
-shape         = alphaShape(Ix,Iy,Iz);
-plot(shape)
-% test the indices
-i=14;
-ind = find(Iz==i);
-figure(1); hold on;
-subplot(1,2,1);
-scatter(Iy(ind), Ix(ind))
-subplot(1,2,2)
-imagesc(mask(:,:,i))
-hold off
+% Estimate the FHWM under the assumption it would be smoothed white noise
+dim1 = size(mask)-1;
+FWHM_est = [ 1 sum(dim1) (dim1(1)*dim1(2)+dim1(1)*dim1(3)+dim1(2)*dim1(3)) prod(dim1)] ./ R;
+FWHM_est = [ FWHM_est(2) sqrt(FWHM_est(3)) (FWHM_est(4))^(1/3) ]
+FWHM_est = mean(FWHM_est)
 
-% compute geometric volumes
-surfvolMask   = surfaceArea(shape);
-volMask       = volume(shape);
-diamMask      = (range(Ix) + range(Iy) + range(Iz))/2; % box approximation of diameter
-
-% Estimate FWHM
-FWHM_est   = [ 1 2*diamMask surfvolMask/2 volMask] ./ R;
-FWHM_est   = [ FWHM_est(2) sqrt(FWHM_est(3)) (FWHM_est(4))^(1/3) ]
-FWHM_est   = mean(FWHM_est);
-
+clear dim1
 %% %%%%%%%%%%%%%% Peak Detection analysis
 % Compute the p-values
 T(~mask) = 0;
@@ -271,25 +244,17 @@ for u = 1:length(Vvec)
     Idetect{u}  = [ Idetect1 Idetect2 Idetect3 Idetect4 Idetect5];
 end
 
-clear Idetect1 Idetect2 Idetect3 Idetect4 Idetect5 Fi S Ps1 Ps2 Ps3 Ps4 Ps5 pValueTable v u ts loc
+clear Idetect1 Idetect2 Idetect3 Idetect4 Fi S Ps1 Ps2 Ps3 Ps4 pValueTable v u ts loc
 
-mY = regr_data.mn_mask(cut1,cut2,cut3,:);
-
-save( strcat(path_data,'AnalysisMoran_FWHM_',num2str(FWHM),'.mat'), ...
-      'kappa_est', 'R', 'Idetect', 'Ps', 'Ts', 'Loc' ,'c', 'Vvec', 'FWHM', 'smoothData', 'smoothT', 'T', 'mask', 'mY' )
+if ~strcmp(subj, 'moran')
+    mY = mean(Y, 4).*mask;
+else
+    mY = regr_data.mn_mask;
+end
+save( strcat(path_data,'Analysis_', subj, '_FWHM_',num2str(FWHM),'.mat'), ...
+      'kappa_est', 'R', 'Idetect', 'Ps', 'Ts', 'Loc' ,'c', 'Vvec', 'FWHM', 'smoothData', 'smoothT', 'subj', 'T', 'mask', 'mY' )
 
 %% Plot the results
-% remove zeros from the boundaries to make pics look more pretty later
-cut1 = 11:sY(1)-10;
-cut2 = 9:sY(1)-8;
-cut3 = 1:34;
-
-Ys   = Ys(cut1, cut2, cut3, :);
-mask = mask(cut1, cut2, cut3);
-sY = size(mask);
-
-
-% Loop over different methods and thresholds
  for u =1:length(Vvec)
     if u==1
         NN1=1;
@@ -304,67 +269,46 @@ sY = size(mask);
     ll      = Loc{u};
     ll      = ll(1:II);
     heights = Ts{u};
-    
-    % compute 3D index from 1D index
+
+    thresh  = heights(II);
+
+    T_thresh = T.*(T >= thresh)./(T >= thresh);
+    figure; clf; hold on;
+    RGB = anatomy(T_thresh, mY, [], 'hot');
+    montage(permute(RGB, [1 2 4 3])), axis xy
+
     smask_valid = sY;
     [Ix,Iy,Iz] = ind2sub(smask_valid, ll);
-    % threshold the T map using the prethreshold Vvec(u)
-    if u > 1
-        thresh  = Vvec(u); %heights(II);
+    if strcmp(subj, 'moran')
+        m = 6;
     else
-         thresh  = heights(II)*0.9;
+        m = 8;
     end
-        
-    T_thresh = T.*(T >= thresh)./(T >= thresh);
-    % set parameters for montage
-    if u > 2
-        m = 4; % m x m montage
-        spt = min(Iz)-1;
-        ept = spt+m^2-1;
-    else
-        m = 5; % m x m montage
-        spt = 6;
-        ept = spt+m^2-1;
-    end
-   Ix = Ix( Iz >= spt & Iz<=ept );
-   Iy = Iy( Iz >= spt & Iz<=ept );    
-   Iz = Iz( Iz >= spt & Iz<=ept );
-
-    % Output a warning if not all peaks are contained in the montage
-    if( max(Iz)>ept )
-        warn = "Not all signifikant peaks are shown!"
-    end
-    figure; clf; camroll(270); hold on;
-    RGB = anatomy(T_thresh(:,:,spt:ept), mY(:,:,spt:ept), [], 'hot');
-    montage(permute(RGB, [1 2 4 3]), 'Size', [m m], 'ThumbnailSize',sY(1:2)), axis xy
-
-    hold on;    
-    
-    for i = 1:length(Iz)
-        if mod(Iz(i)-(spt-1),m)>0
-            Iy_montage(i) = floor((Iz(i)-(spt-1))/m)*smask_valid(1) + Ix(i);
-            Ix_montage(i) = (mod((Iz(i)-(spt-1)), m) - 1)*smask_valid(2) + Iy(i);
+    for i = 1:length(ll),
+        if mod(Iz(i),m)>0,
+        Iy_montage(i) = floor(Iz(i)/m)*smask_valid(1) + Ix(i);
+        Ix_montage(i) = (mod(Iz(i), m) - 1)*smask_valid(2) + Iy(i);
         else
-            Iy_montage(i) = ((Iz(i)-(spt-1))/m -1)*smask_valid(1) + Ix(i);
-            Ix_montage(i) = (m-1)*smask_valid(2) + Iy(i);
+        Iy_montage(i) = (Iz(i)/m -1)*smask_valid(1) + Ix(i);
+        Ix_montage(i) = (m-1)*smask_valid(2) + Iy(i);
         end
     end
     hold on
-    plot(Ix_montage, Iy_montage, '^b', 'LineWidth',1.2)
+    plot(Ix_montage, Iy_montage, '^c')
     hold off
-    clear Ix_montage Iy_montage m Iz RGB smask_valid Ix Iy ll II
-    saveas( gcf, strcat(path_pics,'activationMoran_SmoothT',num2str(smoothT),'_SmoothData', num2str(smoothData), '_FWHM_',num2str(FWHM),'_thresh_',num2str(Vvec(u)),'_',names_methods{methodNr},'.png') )
+    clear Ix_montage Iy_montage m Iz RGB smask_valid
+   saveas( gcf, strcat(path_pics,'activation_',subj, '_FWHM_',num2str(FWHM),'_thresh_',num2str(Vvec(u)),'_',names_methods{methodNr},'.png') )
     end
  end
- clear i spt ept NN1 NN2 u m methodNr
-%% Get the tables from the article
-% clear all
-% path_data  = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\';
-% subj   =  'moran';% 'INV02EBX0JJ'; % 'INV1EZ26N40'; % 'INV02EBX0JJ_2'; % 'INV1EZ26N40_2'; %
-% FWHM = 3.736;
-% %subject
-% load( strcat(path_data,'Analysis_',subj, '_FWHM_',num2str(FWHM),'.mat') )
-
+%% Get the height thresholds from SPM
+clear all
+path_data  = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\';
+subj   =  'moran';% 'INV02EBX0JJ'; % 'INV1EZ26N40'; % 'INV02EBX0JJ_2'; % 'INV1EZ26N40_2'; %
+FWHM = 3.736;
+FWHM = 2.335;
+% subject
+%load( strcat(path_data,'Analysis_',subj, '_FWHM_',num2str(FWHM),'.mat') )
+load( strcat(path_data,'SmoothT_Analysis_',subj, '_FWHM_',num2str(FWHM),'.mat') )
 % Generate critical heights and critical p-values
 criticalHeights = zeros( [5 4] );
 II  = Idetect{1};
