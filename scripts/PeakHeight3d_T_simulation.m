@@ -34,9 +34,10 @@ close all
 % ErrorType = 'isotropicGauss';
 % data_name = 'isoL505030nsim12000n1_gauss_stddev7.mat';
 % ErrorType = 'isotropicGauss';
-% data_name = 'NonStatL505030nsim10000n1_gauss_stddev7.mat';
-data_name = 'anisoL505030nsim10000n1_stddev9_5_7.mat';
-ErrorType = 'anisotropicGauss';
+data_name = 'NonStatL505030nsim10000n1_gauss_stddev7.mat';
+ErrorType = 'nonstationaryGauss';
+% data_name = 'anisoL505030nsim10000n1_stddev9_5_7.mat';
+% ErrorType = 'anisotropicGauss';
 
 path_STEM =  '/home/drtea/Research/MatlabPackages/STEM/';
 path_data = strcat('data/',data_name);
@@ -88,7 +89,7 @@ Rt         = [1 sum(dim1)/FWHM ...
             (dim1(1)*dim1(2)+dim1(1)*dim1(3)+dim1(2)*dim1(3))/FWHM^2 ...
             prod(dim1)/FWHM^3]; % True resels using the formula in K.J. Worsley et al. / NeuroImage 23 (2004) S189�S195
 fieldTYPE = 'T'; %'Z';       %
-STAT      = 'T'; % 'Z';       % Type of statistic maxima are evaluated on (CS only supports 'Z')
+STAT      =  'T'; % 'Z';%       % Type of statistic maxima are evaluated on (CS only supports 'Z')
 
 if(fieldTYPE == 'Z')
     transformT2Z = 0; 
@@ -111,7 +112,7 @@ clear nii_img
 % end
 
 %% Simulate p-values of local maxima higher than ui
-if(strcmp(TYPE,'anisotropic'))
+if(strcmp(TYPE,'anisotropic')||strcmp(TYPE,'nonstationary'))
 %%%% Estimate the resels from a large number of fields
 Mtest = 3000;
 % transform data into a NIFTI file in order to process it in SPM
@@ -249,14 +250,27 @@ end
    path_sim  = 'simulations/';
    path_pics = 'pics/';
    fieldType =  'T';% 'Z'; %
+   ErrorType =  'nonstationaryGauss'; % 'isotropicGauss'; % 'anisotropicGauss'; %
+   
+   Msim      = 1e4;
    kappa     = 1;
    logPlot   = 0; % change both axis to log10 scale
    
    if(fieldType == 'Z')
-       FWHMvec = [5 7];
+       if(strcmp(ErrorType, 'anisotropicGauss'))
+           FWHMvec = 1;
+       else
+           FWHMvec = [5 7];
+       end
        transvec = 0;
    else
-       FWHMvec = [3 5 7];
+       if(strcmp(ErrorType, 'anisotropicGauss'))
+           FWHMvec = 1;
+       elseif(strcmp(ErrorType, 'isotropicGauss'))
+           FWHMvec = [3 5 7];
+       else
+           FWHMvec = [7];
+       end
        transvec = [0,1];
    end
    
@@ -271,16 +285,19 @@ end
       for thresh=[2 2.5 3]
         set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
         % Load the correct simulation results
-        if(fieldType == 'T')
-            file = strcat( 'FieldTYPE_',fieldType,'_N',num2str(N), 'Msim10000_isotropicGauss',...
-                          num2str(FWHM),num2str(FWHM),num2str(FWHM),'kappa',...
-                          num2str(kappa),'_prethresh', num2str(thresh),'_transform', num2str(transform));% output_name;
+        if(strcmp(ErrorType, 'anisotropicGauss'))
+            file  = strcat( 'FieldTYPE_',fieldType,'_N',int2str(N),'Msim',...
+                            int2str(Msim),'_', ErrorType, '957kappa',num2str(kappa),...
+                            '_prethresh',num2str(thresh),'_transform', ...
+                            num2str(transform) );
         else
-            file = strcat( 'FieldTYPE_',fieldType,'_N',num2str(N), 'Msim10000_isotropicGauss',...
-                          num2str(FWHM),num2str(FWHM),num2str(FWHM),'kappa',...
-                          num2str(kappa),'_prethresh', num2str(thresh),...
-                          '_transform', num2str(transform));% output_name;        
+            file  = strcat( 'FieldTYPE_',fieldType,'_N',int2str(N),'Msim',...
+                            int2str(Msim),'_', ErrorType, num2str(FWHM),...
+                            num2str(FWHM),num2str(FWHM),'kappa',num2str(kappa),...
+                            '_prethresh',num2str(thresh),'_transform', ...
+                            num2str(transform) );
         end
+
         load(strcat(path_sim,file,'.mat'))
         if(fieldType == 'Z')
             FieldTYPE =  'Z';        

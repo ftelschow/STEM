@@ -58,7 +58,7 @@ nu     =   5;
 kernel =  'gauss'; % 'quartic'; %
 
 % sigmas for smoothing kernel
-stddev = [5 5 5];
+stddev = [7 7 7];
 
 if strcmp(TYPE, 'anisotropic')
     stddev = [9 5 7];
