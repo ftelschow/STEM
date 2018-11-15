@@ -63,7 +63,7 @@ D  = length(sY);
 % Processing choices
 smoothT    = 0;
 smoothData = 1;
-FWHM       = 2.335*1.6; %3; %
+FWHM       = 2*sqrt(2*log(2))*1.6; %3; %
 
 %% %%%% Preprocessing before data and compute T statistic
 % plot data
@@ -210,7 +210,7 @@ diamMask      = (range(Ix) + range(Iy) + range(Iz))/2; % box approximation of di
 % Estimate FWHM
 FWHM_est   = [ 1 2*diamMask surfvolMask/2 volMask] ./ R;
 FWHM_est   = [ FWHM_est(2) sqrt(FWHM_est(3)) (FWHM_est(4))^(1/3) ]
-FWHM_est   = mean(FWHM_est);
+FWHM_est   = mean(FWHM_est)
 
 %% %%%%%%%%%%%%%% Peak Detection analysis
 % Compute the p-values
