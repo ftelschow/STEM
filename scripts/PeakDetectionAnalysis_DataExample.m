@@ -70,8 +70,7 @@ D  = length(sY);
 % Processing choices
 smoothT    = 0;
 smoothData = 1;
-FWHM       = 2*sqrt(2*log(2))*1.6; %2*sqrt(2*log(2))*2; %
-
+FWHM       = 2*sqrt(2*log(2))*2; % 2*sqrt(2*log(2))*1.6; %
 %% %%%% Preprocessing before data and compute T statistic
 % plot data
 figure(1)
@@ -325,7 +324,7 @@ save( strcat(path_data,'AnalysisMoran_FWHM_',num2str(FWHM),'.mat'), ...
         if u > 1
             thresh  = Vvec(u); %heights(II);
         else
-             thresh  = 3;
+             thresh  = 2.5;
         end
         
     T_thresh = T.*(T >= thresh)./(T >= thresh);
