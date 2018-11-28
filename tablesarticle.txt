@@ -1,29 +1,67 @@
-\begin{table}[H]
-\centering
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-                                  & height & v_2 & v_25 & v_3 \\\hline
-Exact, $\kappa=0.577$ (estimated) & 32     & 8   & 6    & 7   \\\hline
-Exact, $\kappa=1$ (fixed)         & 9      & 5   & 5    & 6   \\\hline
-Adler                             & 0      & 7   & 6    & 7   \\\hline
-Chumbley                          & 0      & 5   & 5    & 6   \\\hline
-SPM                               & 0      & 5   & 5    & 7   \\\hline
-\end{tabular}
-\caption{MyTableCaption}
-\label{table:MyTableLabel}
+%%%%%%
+FWHM = 2*sqrt(2*log(2))*1.6
+data bandwidth as white noise = 2.3813
+
+\begin{table}[H]                   
+\centering                         
+\begin{tabular}{|c|c|c|c|c|}       
+\hline                             
+                                    & height    & $v=2.0$   & $v=2.5$  & $v=3.0$   \\\hline
+Exact, $\kappa=0.0.605$ (estimated)   & 30        & 9     & 6     & 7     \\\hline                             
+Exact, $\kappa=1$ (fixed)           & 10        & 6     & 6     & 6     \\\hline                             
+Adler                               & 0         & 7     & 7     & 8     \\\hline
+Chumbley                            & 0         & 6     & 6     & 6     \\\hline                             
+SPM                                 & 0         & 6     & 6     & 7     \\\hline                             
+\end{tabular}                      
+\caption{MyTableCaption}           
+\label{table:MyTableLabel}         
+\end{table}                
+
+\begin{table}[H]                              
+\centering                                    
+\begin{tabular}{|c|c|c|c|c|}                  
+\hline                                        
+                                    & height    & $v=2.0$   & $v=2.5$  & $v=3.0$   \\\hline
+Exact, $\kappa=0.605$ (estimated)   & 2.99 & 4.00 & 4.56 & 4.14 \\\hline                                        
+Exact, $\kappa=1$ (fixed)           & 3.89 & 4.56 & 4.56 & 4.56 \\\hline                                        
+Adler                               & 0.00 & 4.14 & 4.14 & 4.04 \\\hline                                        
+Chumbley                            & 0.00 & 4.56 & 4.56 & 4.56 \\\hline                                        
+SPM                                 & 0.00 & 4.56 & 4.56 & 4.14 \\\hline                                        
+\end{tabular}                                 
+\caption{MyTableCaption}                      
+\label{table:MyTableLabel}                    
 \end{table}
 
-\begin{table}[H]
-\centering
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-                                  & height  & v_2   & v_25 & v_3  \\\hline
-Exact, $\kappa=0.577$ (estimated) & 2.85    & 3.99  & 4.20 & 4.09 \\\hline
-Exact, $\kappa=1$ (fixed)         & 3.84    & 4.85  & 4.85 & 4.20 \\\hline
-SPM                               & 0.00    & 4.85  & 4.85 & 4.09 \\\hline
-Chumbley                          & 0.00    & 4.85  & 4.85 & 4.20 \\\hline
-Adler                             & 0.00    & 4.09  & 4.20 & 4.09 \\\hline
-\end{tabular}
-\caption{MyTableCaption}
-\label{table:MyTableLabel}
+%%%%%%
+FWHM = 2*sqrt(2*log(2))*3
+data bandwidth as white noise = 3.1445
+
+\begin{table}[H]                   
+\centering                         
+\begin{tabular}{|c|c|c|c|c|}       
+\hline                             
+                                    & height    & $v=2.0$   & $v=2.5$  & $v=3.0$   \\\hline
+Exact, $\kappa=0.516$ (estimated)   & 25 & 7 & 7 & 6 \\\hline
+Exact, $\kappa=1$ (fixed)           & 7 & 6 & 5 & 5 \\\hline
+Adler                               & 0 & 7 & 6 & 6 \\\hline
+Chumbley                            & 0 & 5 & 5 & 5 \\\hline
+SPM                                 & 0 & 7 & 6 & 6 \\\hline 
+\end{tabular}                      
+\caption{MyTableCaption}           
+\label{table:MyTableLabel}         
 \end{table}
+
+\begin{table}[H]                              
+\centering                                    
+\begin{tabular}{|c|c|c|c|c|}                  
+\hline                                        
+                                    & height    & $v=2.0$   & $v=2.5$  & $v=3.0$   \\\hline
+Exact, $\kappa=0.516$ (estimated)   & 2.67 & 4.02 & 4.02 & 4.13 \\\hline
+Exact, $\kappa=1$ (fixed)           & 4.02 & 4.13 & 4.68 & 4.68 \\\hline
+Adler                               & 0.00 & 4.02 & 4.13 & 4.13 \\\hline
+Chumbley                            & 0.00 & 4.68 & 4.68 & 4.68 \\\hline    
+SPM                                 & 0.00 & 4.02 & 4.13 & 4.13 \\\hline
+\end{tabular}                                 
+\caption{MyTableCaption}                      
+\label{table:MyTableLabel}                    
+\end{table} 

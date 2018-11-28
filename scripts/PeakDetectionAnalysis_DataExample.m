@@ -10,7 +10,7 @@
 %__________________________________________________________________________
 % Author: Fabian Telschow (ftelschow@ucsd.edu)
 %
-% Last changes: 05/11/2018
+% Last changes: 28/11/2018
 %__________________________________________________________________________
 % Depends on:
 %       - SmoothField3D.m
@@ -45,9 +45,16 @@ path_data  = 'data/';
 % Load Moran data
 load( strcat(path_data,'sub049_regr_data_fwhm0.mat'))
 Y    = double(regr_data.fMRI);
+mY = regr_data.mn_mask; % mean of data within mask
 mask = regr_data.mn_mask > 0;
 X    = regr_data.X;
 c    = regr_data.c;
+
+% invert the order in the z-direction
+maxzcoord = size(mask,3);
+Y    = Y(:,:,maxzcoord:-1:1,:);
+mask = mask(:,:,maxzcoord:-1:1);
+mY   = mY(:,:,maxzcoord:-1:1);
 
 % Set graphic parameter
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
@@ -63,7 +70,7 @@ D  = length(sY);
 % Processing choices
 smoothT    = 0;
 smoothData = 1;
-FWHM       = 2*sqrt(2*log(2))*1.6; %3; %
+FWHM       = 2*sqrt(2*log(2))*1.6; %2*sqrt(2*log(2))*2; %
 
 %% %%%% Preprocessing before data and compute T statistic
 % plot data
@@ -85,6 +92,16 @@ else
     Ys = Y;
 end
 
+% remove zeros from the boundaries to make pics look more pretty later
+cut1 = 11:sY(1)-10;
+cut2 = 9:sY(1)-8;
+cut3 = 3:36;
+
+Ys   = Ys(cut1, cut2, cut3, :);
+mask = mask(cut1, cut2, cut3);
+mY   = mY(cut1, cut2, cut3);
+sY   = size(mask);
+
 % fit GLM to the data
 [betahat, fitts, residuals, sigma2hat, df, T] = fitGLM2fMRIvolume(Ys, X, c);
 
@@ -97,6 +114,7 @@ colorbar;
 set(gca,'FontSize',20)
 set(findall(gcf,'type','text'),'FontSize',20)
 
+close all
 %% %%%%% compute t-statistic/z-score and normed/corrected residuals
  
 if smoothT
@@ -131,6 +149,7 @@ colorbar;
 set(gca,'FontSize',20)
 set(findall(gcf,'type','text'),'FontSize',20)
 
+close all
 %% Plot the standard deviation map
 tmp = sigma2hat;
 tmp(~mask) = 0;
@@ -152,6 +171,8 @@ subplot(2,3,4), imagesc(tmp(:,:,30)), colorbar;
 subplot(2,3,5), imagesc(tmp(:,:,20)), colorbar;
 subplot(2,3,6), imagesc(tmp(:,:,25)), colorbar;
 clear mask2 tmp Ioutlier 
+
+close all
 %% % Estimate kappa not yet estimated from data
 kappa_est     = estim_kappa( SmoothedResiduals, mask, [1 1 1], df); 
 kappa         = 1;
@@ -210,7 +231,11 @@ diamMask      = (range(Ix) + range(Iy) + range(Iz))/2; % box approximation of di
 % Estimate FWHM
 FWHM_est   = [ 1 2*diamMask surfvolMask/2 volMask] ./ R;
 FWHM_est   = [ FWHM_est(2) sqrt(FWHM_est(3)) (FWHM_est(4))^(1/3) ]
-FWHM_est   = mean(FWHM_est)
+FWHM_est   = mean(FWHM_est);
+
+FWHM_est / (2*sqrt(2*log(2)))
+
+close all
 
 %% %%%%%%%%%%%%%% Peak Detection analysis
 % Compute the p-values
@@ -273,22 +298,10 @@ end
 
 clear Idetect1 Idetect2 Idetect3 Idetect4 Idetect5 Fi S Ps1 Ps2 Ps3 Ps4 Ps5 pValueTable v u ts loc
 
-mY = regr_data.mn_mask(cut1,cut2,cut3,:);
-
 save( strcat(path_data,'AnalysisMoran_FWHM_',num2str(FWHM),'.mat'), ...
       'kappa_est', 'R', 'Idetect', 'Ps', 'Ts', 'Loc' ,'c', 'Vvec', 'FWHM', 'smoothData', 'smoothT', 'T', 'mask', 'mY' )
 
 %% Plot the results
-% remove zeros from the boundaries to make pics look more pretty later
-cut1 = 11:sY(1)-10;
-cut2 = 9:sY(1)-8;
-cut3 = 1:34;
-
-Ys   = Ys(cut1, cut2, cut3, :);
-mask = mask(cut1, cut2, cut3);
-sY = size(mask);
-
-
 % Loop over different methods and thresholds
  for u =1:length(Vvec)
     if u==1
@@ -299,27 +312,30 @@ sY = size(mask);
         NN2 = 5;
     end
     for methodNr = NN1:NN2
-    II      = Idetect{u};
-    II      = II(methodNr);
-    ll      = Loc{u};
-    ll      = ll(1:II);
-    heights = Ts{u};
-    
-    % compute 3D index from 1D index
-    smask_valid = sY;
-    [Ix,Iy,Iz] = ind2sub(smask_valid, ll);
-    % threshold the T map using the prethreshold Vvec(u)
-    if u > 1
-        thresh  = Vvec(u); %heights(II);
-    else
-         thresh  = heights(II)*0.9;
-    end
+        II      = Idetect{u};
+        II      = II(methodNr);
+        ll      = Loc{u};
+        ll      = ll(1:II);
+        heights = Ts{u};
+
+        % compute 3D index from 1D index
+        smask_valid = sY;
+        [Ix,Iy,Iz] = ind2sub(smask_valid, ll);
+        % threshold the T map using the prethreshold Vvec(u)
+        if u > 1
+            thresh  = Vvec(u); %heights(II);
+        else
+             thresh  = 3;
+        end
         
     T_thresh = T.*(T >= thresh)./(T >= thresh);
     % set parameters for montage
     if u > 2
-        m = 4; % m x m montage
-        spt = min(Iz)-1;
+%         m = 4; % m x m montage
+%         spt = min(Iz)-1;
+%         ept = spt+m^2-1;
+        m = 5; % m x m montage
+        spt = 6;
         ept = spt+m^2-1;
     else
         m = 5; % m x m montage
@@ -331,10 +347,10 @@ sY = size(mask);
    Iz = Iz( Iz >= spt & Iz<=ept );
 
     % Output a warning if not all peaks are contained in the montage
-    if( max(Iz)>ept )
+    if( max(Iz)>ept || min(Iz)<spt )
         warn = "Not all signifikant peaks are shown!"
     end
-    figure; clf; camroll(270); hold on;
+    figure; clf; camroll(3*90); hold on;
     RGB = anatomy(T_thresh(:,:,spt:ept), mY(:,:,spt:ept), [], 'hot');
     montage(permute(RGB, [1 2 4 3]), 'Size', [m m], 'ThumbnailSize',sY(1:2)), axis xy
 
