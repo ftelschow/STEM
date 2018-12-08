@@ -1,4 +1,4 @@
-function [ kappa, s2 ] = estim_kappa( z, mask, dz, df, s2 )
+function [ kappa, kappa2, s2 ] = estim_kappa( z, mask, dz, df, s2 )
 %__________________________________________________________________________
 % Estimates the value of kappa assuming global isotropy as in Cheng Schwartzman (2017).
 %
@@ -49,8 +49,8 @@ switch nargin
 end
 
 %%%%% Estimate kappa
-switch D,
-    case 2,
+switch D
+    case 2
         % compute the first gradient
         maskLines        = mask(2:end,:) & mask(1:end-1,:);
         Dz_1             = (z(2:end,:,:) - z(1:end-1,:,:)) / dz(1) ;
@@ -65,8 +65,7 @@ switch D,
         clear Dz_2
         
         % estimate the variance of the gradient across the image
-        s2Dz = ( mean(s2Dz_1(s2Dz_1>1e-10)) + mean(s2Dz_2(s2Dz_2>1e-10))...
-                  ) / D;
+        s2Dz = [ mean(s2Dz_1(s2Dz_1>1e-10)) mean(s2Dz_2(s2Dz_2>1e-10)) ];
 
         % compute the second gradient
         maskLines         = mask(3:end,:) & mask(2:end-1,:) & mask(1:end-2,:);
@@ -82,9 +81,8 @@ switch D,
         clear DDz_2
         
         % estimate the variance of the second gradient across the image
-        s2DDz = ( mean(s2DDz_1(s2DDz_1>1e-10)) + mean(s2DDz_2(s2DDz_2>1e-10))...
-                  ) / D;
-    case 3,        
+        s2DDz = [ mean(s2DDz_1(s2DDz_1>1e-10)) mean(s2DDz_2(s2DDz_2>1e-10)) ];
+    case 3        
         % compute the first gradient
         maskLines        = mask(2:end,:,:) & mask(1:end-1,:,:);
         Dz_1             = (z(2:end,:,:,:) - z(1:end-1,:,:,:)) / dz(1) ;
@@ -105,8 +103,8 @@ switch D,
         clear Dz_3
         
         % estimate the variance of the gradient across the image
-        s2Dz = ( mean(s2Dz_1(s2Dz_1>1e-10)) + mean(s2Dz_2(s2Dz_2>1e-10)) + ...
-                 mean(s2Dz_3(s2Dz_3>1e-10)) ) / D;
+        s2Dz = [ mean(s2Dz_1(s2Dz_1>1e-10)) mean(s2Dz_2(s2Dz_2>1e-10)) ...
+                 mean(s2Dz_3(s2Dz_3>1e-10)) ];
 
         % compute the second gradient
         maskLines         = mask(3:end,:,:) & mask(2:end-1,:,:) & mask(1:end-2,:,:);
@@ -128,8 +126,8 @@ switch D,
         clear DDz_3
         
         % estimate the variance of the second gradient across the image
-        s2DDz = ( mean(s2DDz_1(s2DDz_1>1e-10)) + mean(s2DDz_2(s2DDz_2>1e-10)) + ...
-                 mean(s2DDz_3(s2DDz_3>1e-10)) ) / D;
+        s2DDz = [ mean(s2DDz_1(s2DDz_1>1e-10)) mean(s2DDz_2(s2DDz_2>1e-10)) ...
+                  mean(s2DDz_3(s2DDz_3>1e-10)) ];
 end
                      
 % get an estimate of rho'(t)
@@ -138,4 +136,5 @@ rho1  = -s2Dz / s2 / 2;
 rho2  = s2DDz / s2 / 12;
 
 % get the estimate of kappa as a field
-kappa = -rho1 / sqrt(rho2);
+kappa2  = -mean(rho1) / sqrt(mean(rho2));
+kappa = -mean(rho1 ./ sqrt(rho2)); 

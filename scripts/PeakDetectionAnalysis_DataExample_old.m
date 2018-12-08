@@ -62,7 +62,7 @@ D  = length(sY);
 % Processing choices
 smoothT    = 0;
 smoothData = 1;
-FWHM       = 4; %2.335*1.6;
+FWHM       = 2.335*1; % 4; %
 
 %% %%%% Preprocessing before data and compute T statistic
 % plot data

@@ -34,10 +34,13 @@ close all
 % ErrorType = 'isotropicGauss';
 % data_name = 'isoL505030nsim12000n1_gauss_stddev7.mat';
 % ErrorType = 'isotropicGauss';
-data_name = 'NonStatL505030nsim10000n1_gauss_stddev7.mat';
-ErrorType = 'nonstationaryGauss';
+% data_name = 'NonStatL505030nsim10000n1_gauss_stddev7.mat';
+% ErrorType = 'nonstationaryGauss';
 % data_name = 'anisoL505030nsim10000n1_stddev9_5_7.mat';
 % ErrorType = 'anisotropicGauss';
+data_name = 'anisoL505030nsim10000n1_stddev7_3_5.mat'
+ErrorType = 'anisotropicGauss';
+
 
 path_STEM =  '/home/drtea/Research/MatlabPackages/STEM/';
 path_data = strcat('data/',data_name);
@@ -73,7 +76,7 @@ else
     kernel =  'gauss'; % 'quartic'; %
 
     % sigmas for smoothing kernel
-    stddev = [5 7 9];%[5 5 5]; % [7 7 7];
+    stddev = [7 3 5];%[5 5 5]; % [7 7 7];
 end
 % get dimension of the field
 D         = length(dim);
@@ -88,8 +91,8 @@ dim1      = dim-1;
 Rt         = [1 sum(dim1)/FWHM ...
             (dim1(1)*dim1(2)+dim1(1)*dim1(3)+dim1(2)*dim1(3))/FWHM^2 ...
             prod(dim1)/FWHM^3]; % True resels using the formula in K.J. Worsley et al. / NeuroImage 23 (2004) S189�S195
-fieldTYPE = 'T'; %'Z';       %
-STAT      =  'T'; % 'Z';%       % Type of statistic maxima are evaluated on (CS only supports 'Z')
+fieldTYPE =  'T'; %'Z';       %
+STAT      =   'Z';%'T'; %       % Type of statistic maxima are evaluated on (CS only supports 'Z')
 
 if(fieldTYPE == 'Z')
     transformT2Z = 0; 
@@ -250,7 +253,7 @@ end
    path_sim  = 'simulations/';
    path_pics = 'pics/';
    fieldType =  'T';% 'Z'; %
-   ErrorType =  'nonstationaryGauss'; % 'isotropicGauss'; % 'anisotropicGauss'; %
+   ErrorType =   'anisotropicGauss'; % 'nonstationaryGauss'; % 'isotropicGauss'; %
    
    Msim      = 1e4;
    kappa     = 1;
@@ -287,7 +290,7 @@ end
         % Load the correct simulation results
         if(strcmp(ErrorType, 'anisotropicGauss'))
             file  = strcat( 'FieldTYPE_',fieldType,'_N',int2str(N),'Msim',...
-                            int2str(Msim),'_', ErrorType, '957kappa',num2str(kappa),...
+                            int2str(Msim),'_', ErrorType, '735kappa',num2str(kappa),...
                             '_prethresh',num2str(thresh),'_transform', ...
                             num2str(transform) );
         else

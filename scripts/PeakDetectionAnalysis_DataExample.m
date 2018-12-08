@@ -199,7 +199,7 @@ clear nii_img
 
 % Estimate resels using SPM
 cd(path_tmp)
-[~,~,R] = spm_est_smoothness( char(names), strcat('/home/drtea/Research/MatlabPackages/STEM/mask/mask.nii' ), [n df]);
+[FWHM2,~,R] = spm_est_smoothness( char(names), strcat('/home/drtea/Research/MatlabPackages/STEM/mask/mask.nii' ), [n df]);
 clear dinfo names
 cd ..
 
