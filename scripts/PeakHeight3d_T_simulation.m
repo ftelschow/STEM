@@ -28,9 +28,9 @@ clear
 close all
 
 % Choose machine we are working on
-% data_name = 'isoL505030nsim10000n1_gauss_stddev3.mat';
-% ErrorType = 'isotropicGauss';
-% data_name = 'isoL505030nsim12000n1_gauss_stddev5.mat';
+data_name = 'isoL505030nsim10000n1_gauss_stddev3.mat';
+ErrorType = 'isotropicGauss';
+% data_name = 'isoL505030nsim1n12000_gauss_stddev5.mat';
 % ErrorType = 'isotropicGauss';
 % data_name = 'isoL505030nsim12000n1_gauss_stddev7.mat';
 % ErrorType = 'isotropicGauss';
@@ -38,8 +38,8 @@ close all
 % ErrorType = 'nonstationaryGauss';
 % data_name = 'anisoL505030nsim10000n1_stddev9_5_7.mat';
 % ErrorType = 'anisotropicGauss';
-data_name = 'anisoL505030nsim10000n1_stddev7_3_5.mat'
-ErrorType = 'anisotropicGauss';
+% data_name = 'anisoL505030nsim10000n1_stddev7_3_5.mat'
+% ErrorType = 'anisotropicGauss';
 
 
 path_STEM =  '/home/drtea/Research/MatlabPackages/STEM/';
@@ -63,7 +63,7 @@ else
     % size of domain
     dim      = [50 50 30];
     % property of covariance structure
-    TYPE   = 'anisotropic'; % 'nonstationary'; % 'isotropic'; %
+    TYPE   = 'isotropic'; % 'anisotropic'; % 'nonstationary'; %
     if strcmp('TYPE', 'nonstationary')
            bin = [[floor(dim(1)/4), floor(dim(2)/2), floor(dim(3)/2)]; [2, 2, 2]];
     else
@@ -82,17 +82,17 @@ end
 D         = length(dim);
 
 % General Parameter for simulation
-Nvec      = [ 50 100 200 ]; %  [ 20 ];%      % sample size used to estimate LKCs, kappas etc
-Uvec      = [-20 2.0 2.5 3.0]; % [2.5 3.0]; %
+Nvec      = [ 50 100 200 ]; % [ 20 ];%       % sample size used to estimate LKCs, kappas etc
+Uvec      = [-20]; % [2.0 2.5 3.0]; % [2.5 3.0]; %
 Msim      = 1e4;       % number of simulations
 kappa     = 1;         % divide lower bound of integral by std in CS method (Y/N)
 FWHM      = stddev(1)*2*sqrt(2*log(2));
 dim1      = dim-1;
-Rt         = [1 sum(dim1)/FWHM ...
+R         = [1 sum(dim1)/FWHM ...
             (dim1(1)*dim1(2)+dim1(1)*dim1(3)+dim1(2)*dim1(3))/FWHM^2 ...
             prod(dim1)/FWHM^3]; % True resels using the formula in K.J. Worsley et al. / NeuroImage 23 (2004) S189�S195
-fieldTYPE =  'T'; %'Z';       %
-STAT      =   'Z';%'T'; %       % Type of statistic maxima are evaluated on (CS only supports 'Z')
+fieldTYPE = 'T'; % 'Z';
+STAT      = 'T'; % 'Z';   % Type of statistic maxima are evaluated on (CS only supports 'Z')
 
 if(fieldTYPE == 'Z')
     transformT2Z = 0; 
@@ -115,7 +115,7 @@ clear nii_img
 % end
 
 %% Simulate p-values of local maxima higher than ui
-if(strcmp(TYPE,'anisotropic')||strcmp(TYPE,'nonstationary'))
+%if(strcmp(TYPE,'anisotropic')||strcmp(TYPE,'nonstationary'))
 %%%% Estimate the resels from a large number of fields
 Mtest = 3000;
 % transform data into a NIFTI file in order to process it in SPM
@@ -131,7 +131,7 @@ names = names(3:end);
 
 % Estimate resels using SPM
 [~,~,R] = spm_est_smoothness( char(names), path_mask, [3000 3000]);
-end
+%end
 
 cd(path_STEM);
 for uu = 1:length(Uvec)
@@ -226,7 +226,7 @@ for uu = 1:length(Uvec)
                Ps       = Adler_peakFDR( T, D, ui, 0.05, Loc );
                Ps_A     = Ps;
             else
-               Ps  = SPM_peakFDR( 0.05, [N N], STAT, R, 1, T, ui, Loc );
+               Ps       = SPM_peakFDR( 0.05, [N N], STAT, R, 1, T, ui, Loc );
                Ps_spm   = [Ps_spm Ps];
                Ps       = Table_peakFDR( T, D, ui, 0.05, pValueTable, Loc );
                Ps_CS    = [Ps_CS Ps];
@@ -252,8 +252,10 @@ end
    cd /home/drtea/Research/MatlabPackages/STEM
    path_sim  = 'simulations/';
    path_pics = 'pics/';
-   fieldType =  'T';% 'Z'; %
-   ErrorType =   'anisotropicGauss'; % 'nonstationaryGauss'; % 'isotropicGauss'; %
+   fieldType =  'Z'; % 'T';%
+   ErrorType =   'isotropicGauss'; % 'anisotropicGauss'; % 'nonstationaryGauss'; %
+   
+   threshVec = [2 2.5 3];
    
    Msim      = 1e4;
    kappa     = 1;
@@ -263,7 +265,7 @@ end
        if(strcmp(ErrorType, 'anisotropicGauss'))
            FWHMvec = 1;
        else
-           FWHMvec = [5 7];
+           FWHMvec = 3%[5 7];
        end
        transvec = 0;
    else
@@ -285,7 +287,7 @@ end
         nvec = [50 100 200];
     end
     for N = nvec
-      for thresh=[2 2.5 3]
+      for thresh=threshVec
         set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
         % Load the correct simulation results
         if(strcmp(ErrorType, 'anisotropicGauss'))
