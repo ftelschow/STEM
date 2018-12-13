@@ -198,7 +198,7 @@ input.data = tab;
 input.dataFormat = {'%.4f'};
 latex = latexTable(input);
 
-tab = array2table(sdkappa, 'VariableNames', {'GaussIso7', 'GaussIso5', 'GaussIso3', 'QuarticIso15', 'QuarticIso11', 'QuarticIso7'},...
+tab = array2table(sdkappa, 'VariableNames', {'GaussIso7', 'GaussIso5', 'GaussIso3', 'QuarticIso18'},...
     'RowNames', {'50', '100', '200'})
 input.tablePlacement='H';
 input.data = tab;

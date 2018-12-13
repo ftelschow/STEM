@@ -26,16 +26,23 @@
 clear
 close all
 
-%%% Set working path
-workpath = '/home/drtea/Research/MatlabPackages/STEM';
-% local computer
-cd(workpath)
+
+path_STEM =  '/home/drtea/Research/MatlabPackages/STEM/';
+path_sim  = 'simulations/';
+path_pics = 'pics/';
+% workspace
+cd( path_STEM );
+% %%% Set working path
+% workpath = '/home/drtea/Research/MatlabPackages/STEM';
+% % local computer
+% cd(workpath)
 
 % Decide whether data needs to be pre-computed or is already saved on the 
 % hard drive
 load_data = 0;
 
-% path_data = 'data/isoL505030nsim1n12000_gauss_stddev7.mat';
+% path_data = 'data/isoL505030nsim1000n1_quartic_stddev16.mat';
+% 'data/isoL505030nsim1n12000_gauss_stddev7.mat';
 % path_data = 'data/isoL505030nsim1n12000_gauss_stddev5.mat';
 % path_data = 'data/isoL505030nsim10000n1_gauss_stddev3.mat';
 % path_data = 'C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\data\isoL505030nsim1n1000_quartic_stddev18.mat';
@@ -62,12 +69,13 @@ kernel = 'gauss'; % 'quartic'; %
 ErrorType = [TYPE, kernel];
 
 % sigmas for smoothing kernel
-stddev = [3 3 3];
+stddev = [1.6 1.6 1.6];
 
 %% % Generate data or load data
 if(load_data)
     load( path_data );
     f = squeeze(f);
+    ErrorType = [TYPE, kernel];
 else
     if( isempty(gcp('nocreate')) && pool_num > 1 )   
         parpool( pool_num );
@@ -95,8 +103,8 @@ else
 %                   'nsim',num2str(nsim),'n',num2str(n),'_stddev',num2str(stddev(1)),...
 %                   '_',num2str(stddev(2)),'_',num2str(stddev(3)),'.mat'], '-v7.3')
         case 'nonstationary'
-            %bin = [[12, 25, 15]; [2, 2, 2]];
-            bin = [[10, 10, 6]; [5, 5, 5]];
+            bin = [[12, 25, 15]; [2, 2, 2]];
+            %bin = [[10, 10, 6]; [5, 5, 5]];
             f = SmoothField3D(n, nsim, stddev, dim, noise, nu, kernel, bin, pool_num);
             f = squeeze(f);
             stdf = std(f, 0, length(dim)+1 );
@@ -144,7 +152,8 @@ toc
 %% %% Calculate p-values of local maxima
 kappa   = 1; % theoretical kappa
 % kappa   = exp(-1/16/stddev(1)^2) % 
-%kappa   = kappa_estim; % theoretical kappa
+%kappa   = kappa_estim; % estimated kappa
+% kappa   = 0.905;
 density = peakHeightDensity( 3, kappa );
 tic
 pval    = integral(@(x) density(x + locmaxZ'), 0, Inf, 'ArrayValued',true);
@@ -153,7 +162,7 @@ pval    = integral(@(x) density(x + locmaxZ'), 0, Inf, 'ArrayValued',true);
 toc
 
 output_name = strcat('FieldTYPE_Z_Msim',...
-                     int2str(Msim),'_', ErrorType, num2str(stddev(1)), num2str(stddev(2)), num2str(stddev(3)),'kappa',num2str(kappa),'_prethresh',num2str(ui),'_transform', num2str(transformT2Z));
+                     int2str(nsim),'_', ErrorType, num2str(stddev(1)), num2str(stddev(2)), num2str(stddev(3)),'kappa',num2str(kappa));
 save( strcat(path_sim,output_name,'.mat'), 'locmaxZ', 'kappa', 'kernel', 'stddev',...
                     'TYPE', 'pval', 'noise', 'nsim', 'dim', 'n')
 

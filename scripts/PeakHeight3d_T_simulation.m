@@ -29,17 +29,11 @@ close all
 
 % Choose machine we are working on
 data_name = 'isoL505030nsim10000n1_gauss_stddev3.mat';
-ErrorType = 'isotropicGauss';
 % data_name = 'isoL505030nsim1n12000_gauss_stddev5.mat';
-% ErrorType = 'isotropicGauss';
 % data_name = 'isoL505030nsim12000n1_gauss_stddev7.mat';
-% ErrorType = 'isotropicGauss';
 % data_name = 'NonStatL505030nsim10000n1_gauss_stddev7.mat';
-% ErrorType = 'nonstationaryGauss';
 % data_name = 'anisoL505030nsim10000n1_stddev9_5_7.mat';
-% ErrorType = 'anisotropicGauss';
 % data_name = 'anisoL505030nsim10000n1_stddev7_3_5.mat'
-% ErrorType = 'anisotropicGauss';
 
 
 path_STEM =  '/home/drtea/Research/MatlabPackages/STEM/';
@@ -58,6 +52,7 @@ if load_data
     load( path_data );
     load_data = 1;
     f = squeeze(f);
+    ErrorType = strcat(TYPE,kernel)
 else
     %%%% Parameters for the noise
     % size of domain
@@ -77,6 +72,7 @@ else
 
     % sigmas for smoothing kernel
     stddev = [7 3 5];%[5 5 5]; % [7 7 7];
+    ErrorType = strcat(TYPE,kernel);
 end
 % get dimension of the field
 D         = length(dim);

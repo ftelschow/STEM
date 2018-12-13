@@ -165,8 +165,10 @@ end
 
 % Smooth the signal
 if strcmp( fieldTYPE, 'Z' )
-    tmp    = zeros(dim);
-    signal = spm_smooth(signal, tmp, FWHM);                
+    tmp   = zeros(sY(1:D));
+
+    Z  = spm_smooth(signal, tmp, FWHM);                
+
 end
 
 

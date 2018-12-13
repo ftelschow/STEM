@@ -14,6 +14,36 @@ cd( path_STEM );
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
 
 load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicgauss777kappa1.mat' ))
+% plot ecdf
+figure(1), clf, hold on
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'b', 'linewidth', 1.5)
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicgauss555kappa1.mat' ))
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'r', 'linewidth', 1.5)
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicgauss333kappa1.mat' ))
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'g', 'linewidth', 1.5)
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicgauss1.61.61.6kappa1.mat' ))
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'm', 'linewidth', 1.5)
+
+axis([0 0.05 0 0.05]), axis square
+plot([0 1], [0 1], 'k--', 'linewidth', 1.5), hold off
+set(gca, 'fontsize', 20)
+h = xlabel('p-value'); ylabel('empirical cdf')
+legend( 'FWHM=17', 'FWHM=12', 'FWHM=7', 'FWHM=4','Uniform', 'Location', 'northwest' );
+
+saveas( gcf, [path_STEM,'\pics\isotropicgauss_HeightEcdf_kappa1.png'] )
+hold off
+
+%% Summarizing plots of the results of the simulation
+set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicgauss777kappa1.mat' ))
 % plot ecdf and its confidence bands
 figure(1), clf, hold on
 [ FF, X, FLO, FUP  ] = ecdf(pval);
@@ -27,7 +57,7 @@ load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicgauss333kappa1.mat' ))
 [ FF, X, FLO, FUP  ] = ecdf(pval);
 plot(X, FF, 'g', 'linewidth', 1.5)
 
-load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicgauss111kappa1.mat' ))
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicgauss1.61.61.6kappa1.mat' ))
 [ FF, X, FLO, FUP  ] = ecdf(pval);
 plot(X, FF, 'm', 'linewidth', 1.5)
 
@@ -35,10 +65,11 @@ axis([0 0.05 0 0.05]), axis square
 plot([0 1], [0 1], 'k--', 'linewidth', 1.5), hold off
 set(gca, 'fontsize', 20)
 h = xlabel('p-value'); ylabel('empirical cdf')
-legend( 'FWHM=17', 'FWHM=12', 'FWHM=7', 'FWHM=2','Uniform', 'Location', 'northwest' );
+legend( 'FWHM=17', 'FWHM=12', 'FWHM=7', 'FWHM=4','Uniform', 'Location', 'northwest' );
 
 saveas( gcf, [path_STEM,'\pics\isotropicgauss_HeightEcdf_kappa1.png'] )
 hold off
+
 
 %%%%%%%%%%%% Anisotropic case
 %% Summarizing plots of the results of the simulation
@@ -118,4 +149,83 @@ h = xlabel('p-value'); ylabel('empirical cdf')
 legend( 'FWHM=17', 'FWHM=12', 'FWHM=7','Uniform', 'Location', 'northwest' );
 
 saveas( gcf, [path_STEM,'\pics\nonstationarygauss_HeightEcdf_kappaestim.png'] )
+hold off
+
+%%%%%%%%%%%% Quartic case
+%% Summarizing plots of the results of the simulation
+set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicquartic161616kappa1.mat' ))
+% plot ecdf and its confidence bands
+figure(1), clf, hold on
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'b', 'linewidth', 1.5)
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicquartic121212kappa1.mat' ))
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'r', 'linewidth', 1.5)
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicquartic888kappa1.mat' ))
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'g', 'linewidth', 1.5)
+
+axis([0 0.05 0 0.05]), axis square
+plot([0 1], [0 1], 'k--', 'linewidth', 1.5), hold off
+set(gca, 'fontsize', 20)
+h = xlabel('p-value'); ylabel('empirical cdf')
+legend( 'FWHM=17', 'FWHM=12', 'FWHM=7','Uniform', 'Location', 'northwest' );
+
+saveas( gcf, [path_STEM,'\pics\isotropicquartic_HeightEcdf_kappa1.png'] )
+hold off
+
+% kappaestim plots
+set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicquartic161616kappa0.93947.mat' ))
+% plot ecdf and its confidence bands
+figure(1), clf, hold on
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'b', 'linewidth', 1.5)
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicquartic121212kappa0.9535.mat' ))
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'r', 'linewidth', 1.5)
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicquartic888kappa0.97545.mat' ))
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'g', 'linewidth', 1.5)
+
+axis([0 0.05 0 0.05]), axis square
+plot([0 1], [0 1], 'k--', 'linewidth', 1.5), hold off
+set(gca, 'fontsize', 20)
+h = xlabel('p-value'); ylabel('empirical cdf')
+legend( 'FWHM=17', 'FWHM=12', 'FWHM=7','Uniform', 'Location', 'northwest' );
+
+saveas( gcf, [path_STEM,'\pics\isotropicquartic_HeightEcdf_kappaestim.png'] )
+hold off
+
+% kappaestim plots
+set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicquartic161616kappa0.905.mat' ))
+% plot ecdf and its confidence bands
+figure(1), clf, hold on
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'b', 'linewidth', 1.5)
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicquartic121212kappa0.905.mat' ))
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'r', 'linewidth', 1.5)
+
+load(strcat(path_sim,'FieldTYPE_Z_Msim1000_isotropicquartic888kappa0.905.mat' ))
+[ FF, X, FLO, FUP  ] = ecdf(pval);
+plot(X, FF, 'g', 'linewidth', 1.5)
+
+axis([0 0.05 0 0.05]), axis square
+plot([0 1], [0 1], 'k--', 'linewidth', 1.5), hold off
+set(gca, 'fontsize', 20)
+h = xlabel('p-value'); ylabel('empirical cdf')
+legend( 'FWHM=17', 'FWHM=12', 'FWHM=7','Uniform', 'Location', 'northwest' );
+
+saveas( gcf, [path_STEM,'\pics\isotropicquartic_HeightEcdf_kappa0.905.png'] )
 hold off
