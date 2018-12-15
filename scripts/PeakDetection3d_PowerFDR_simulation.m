@@ -39,15 +39,16 @@ if strcmp(machine, 'server')
     cd /home/ftelschow/PeakDetection/simulations/;
 
 else
-%     data_name = 'isoL505030nsim1n12000_gauss_stddev5.mat';
+    data_name = 'isoL505030nsim1n12000_gauss_stddev5.mat';
 %     data_name = 'isoL505030nsim1000n1_quartic_stddev18.mat';
 %     data_name = 'isoL505030nsim1000n1_quartic_stddev16.mat';
 %     data_name = 'isoL505030nsim1000n1_quartic_stddev12.mat';
-    data_name = 'isoL505030nsim1000n1_quartic_stddev8.mat';
+%     data_name = 'isoL505030nsim1000n1_quartic_stddev8.mat';
+%    data_name = 'isoL505030nsim10000n1_gauss_stddev3.mat';
     %data_name = 'isoL505030nsim12000n1_gauss_stddev7.mat';
     path_stem = '/home/drtea/Research/MatlabPackages/STEM/';
     path_data = strcat(path_stem,'data/',data_name);
-    cd /home/drtea/Research/MatlabPackages/STEM/simulations/
+    cd /home/drtea/Research/MatlabPackages/STEM/
 end
 
 load( path_data );
@@ -58,7 +59,7 @@ STAT      = 'Z';       % Type of statistic maxima are evaluated on (CS only supp
 
 %%% Simulation specifications
 % number of simulations
-Msim = 1e4;
+Msim = 0.5e4;
 % Vector of considered sample sizes in the T situation
 N = 20;
 % threshold for peaks
@@ -79,7 +80,7 @@ clear dim1
 
 %%% Signal bump specifications
 % half support of bumps
-Supp_name =  'MatchFilter'; % 'Small'; % 'Large'; %
+Supp_name =  'Small'; % 'Large'; %  'MatchFilter'; %
 if strcmp(Supp_name,'Small')
     supp   = [ [5 8 5]; [5 7 7 ]; [5 6 5 ] ];
 elseif strcmp(Supp_name,'Large')
@@ -98,6 +99,7 @@ nPeaks = size(supp,1);
 
 dim = size(f);
 dim = dim(1:3);
+D   = length(dim);
 
 %% compute pValue table
 pValueTable = PvalueTable_heightDistr( 3, kappa, 1e-3, -3, 7);
@@ -163,13 +165,6 @@ else
     A         = SNRvec / signalMax( 2 );
 end
 
-% Smooth the signal
-if strcmp( fieldTYPE, 'Z' )
-    tmp    = zeros(dim);
-    signal = spm_smooth(signal, tmp, FWHM);                
-end
-
-
 tic
     for ii = 1:length(SNRvec)
         for i = 1:Msim
@@ -184,11 +179,11 @@ tic
                 error('specify correct data generation type. ("T" or "Z")')
             end
             % compute the p-values for different methods
-            [Z, loc ]= find_locMax( Z, thresh );
+            [Z, Loc ]= find_locMax( Z, thresh );
             
             % sort the values of Z to obtain sorted p-values later
             [Z, II] = sort(Z, 'descend');
-            loc = loc(II);
+            Loc = Loc(II);
             
             for ll = 1:4
                 switch ll
@@ -217,7 +212,7 @@ tic
                     truePeak = 0;
                     for kk = 1:nPeaks
                         V = suppSignal(:,:,:,kk);
-                        if V(loc(k)) && ~p_detect(kk)
+                        if V(Loc(k)) && ~p_detect(kk)
                             TrueDiscovery(kk,ii,ll) = TrueDiscovery(kk,ii,ll) + 1;
                             truePeak                = 1;
                             p_detect(kk)            = 1;
@@ -234,7 +229,7 @@ tic
         end
     end
 
-    clear I Idetect k kk i ii ll Ps S signalMax suppSignal truePeak Z V f loc
+    clear I Idetect k kk i ii ll Ps S signalMax suppSignal f truePeak Z V Loc
 toc
 
 %load('C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\simulations\FDR_Power_TheoryIsotropicGauss.mat')
@@ -242,4 +237,4 @@ toc
 FDR     = FalseDiscovery ./ ( squeeze(sum(TrueDiscovery,1)) + FalseDiscovery );
 avPower = squeeze(mean(TrueDiscovery,1) / Msim);
 
-save(strcat('simulations/FieldTYPE_',fieldTYPE, num2str(N), '_Supp',Supp_name,'_std',num2str(stddev(1)),num2str(stddev(2)),num2str(stddev(3)),'_thresh',num2str(thresh),'_FDR_Power_TheoryIsotropicGauss.mat'));
+%save(strcat('simulations/FieldTYPE_',fieldTYPE, num2str(N), '_Supp',Supp_name,'_std',num2str(stddev(1)),num2str(stddev(2)),num2str(stddev(3)),'_thresh',num2str(thresh),'_FDR_Power_TheoryIsotropicGauss.mat'));
