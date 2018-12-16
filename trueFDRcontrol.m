@@ -44,7 +44,7 @@ volume =  sum(S(:)) - sum(truePeakS(:));
 % expected number of false peaks
 numberFalsePeaks = (29 * sqrt(6) - 36) /36 /pi^2 * rho_quot^(3/2) * volume;
 
-if u == -666
+if v == -666
     alpha = alpha*numberFalsePeaks / (numberFalsePeaks + nTruePeaks);
 else
     
