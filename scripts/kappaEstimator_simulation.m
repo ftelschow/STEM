@@ -178,17 +178,17 @@ sdkappa(:,3) = std(kappaMat,0,2);
 load(strcat(path_sim,'KappaSimulation_isotropic_quartic_std_16'))
 kappaMat     = squeeze(kappaMat);
 mKappa(:,4)  = mean(kappaMat,2);
-sdkappa(:,4) = std(kappaMatStd,0);
+sdkappa(:,4) = std(kappaMatStd,0)./sqrt(Nvec);
 
 load(strcat(path_sim,'KappaSimulation_isotropic_quartic_std_12'))
 kappaMat     = squeeze(kappaMat);
 mKappa(:,5)  = mean(kappaMat,2);
-sdkappa(:,5) = std(kappaMatStd,0);
+sdkappa(:,5) = std(kappaMatStd,0)./sqrt(Nvec);
 
 load(strcat(path_sim,'KappaSimulation_isotropic_quartic_std_8'))
 kappaMat     = squeeze(kappaMat);
 mKappa(:,6)  = mean(kappaMat,2);
-sdkappa(:,6) = std(kappaMatStd,0);
+sdkappa(:,6) = std(kappaMatStd,0)./sqrt(Nvec);
 
 %% make a latex table
 tab = array2table(mKappa, 'VariableNames', {'GaussIso7', 'GaussIso5', 'GaussIso3', 'QuarticIso15', 'QuarticIso11', 'QuarticIso7'},...

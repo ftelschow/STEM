@@ -27,7 +27,7 @@
 clear
 close all
 
-% Choose the machine we are working on
+% Choose machine we are working on
 machine = 'private'; % 'server'; %
 
 % Load data from pre-computed source
@@ -59,7 +59,7 @@ STAT      = 'Z';       % Type of statistic maxima are evaluated on (CS only supp
 
 %%% Simulation specifications
 % number of simulations
-Msim = 0.25e4;
+Msim = 1e4;
 % Vector of considered sample sizes in the T situation
 N = 20;
 % threshold for peaks
@@ -67,39 +67,32 @@ thresh =  -20; %3; %
 % FDR level
 q = 0.05;
 % SNR levels for peaks
-SNRvec = [3 3.5 4 5 7];
+SNRvec = [3 3.5 4 5 7]; %3:2:9;
 % kappa parameter set to true value
-kappa     = 1;
+kappa     = 1;         % divide lower bound of integral by std in CS method (Y/N)
 % true ressels
-FWHM      = stddev*2*sqrt(2*log(2));
+FWHM      = stddev(1)*2*sqrt(2*log(2));
 dim1      = dim-1;
-R         = [1 sum(dim1)/mean(FWHM) ...
-            (dim1(1)*dim1(2)+dim1(1)*dim1(3)+dim1(2)*dim1(3))/mean(FWHM)^2 ...
-            prod(dim1)/mean(FWHM)^3];
-clear dim1
+R         = [1 sum(dim1)/FWHM ...
+            (dim1(1)*dim1(2)+dim1(1)*dim1(3)+dim1(2)*dim1(3))/FWHM^2 ...
+            prod(dim1)/FWHM^3];
+clear FWHM dim1
 
 %%% Signal bump specifications
 % half support of bumps
-Supp_name =  'Small'; % 'Large'; %  'MatchFilter'; %
+Supp_name =  'Small'; % 'Large'; %
 if strcmp(Supp_name,'Small')
-    supp   = [ [5 8 5]; [5 7 7 ]; [5 6 5 ] ];
-elseif strcmp(Supp_name,'Large')
-    supp   = [ [10 10 5]; [7 7 7 ]; [5 8 5 ] ];
+    supp   = [ [5 8 5]; [5 7 7 ]; [5 6 5 ]  ];
 else
-    supp   = [ [4 4 4]; [8 8 8]; [12 12 12] ];
+    supp   = [ [10 10 5]; [7 7 7 ]; [5 8 5 ]  ];
 end
 % coordinates to place bumps
-if strcmp(Supp_name,'Small') || strcmp(Supp_name,'Large')
-    coords = [ [5 5 2]; [30 30 15 ]; [30 5 5] ];
-else
-    coords = [ [5 5 2]; [6 30 14 ]; [28 5 5] ];
-end
+coords = [ [5 5 2]; [30 30 15 ]; [30 5 5] ];
 % number of true peaks
 nPeaks = size(supp,1);
 
 dim = size(f);
 dim = dim(1:3);
-D   = length(dim);
 
 %% compute pValue table
 pValueTable = PvalueTable_heightDistr( 3, kappa, 1e-3, -3, 7);
@@ -120,20 +113,12 @@ for i = 1:size(supp,1)
     sT = size(tmp);
     h = repmat( tmp, [1 1 length(h3)]) .* repmat(shiftdim(h3, -1), [sT(1) sT(2) 1]);
     h = h / sqrt(sum((h(:).^2)));
+    sT = size(h);
+    signal( coords(i,1):(coords(i,1)+sT(1)-1), coords(i,2):(coords(i,2)+sT(2)-1), coords(i,3):(coords(i,3)+sT(3)-1) ) = h;
     signalMax(i) = max(h(:));
     
-    % normalize all signals to same height=1
-    if strcmp(Supp_name, 'MatchFilter')
-        h = h/signalMax(i);
-    end
-    sT = size(h);
-    signal( coords(i,1):(coords(i,1)+sT(1)-1), coords(i,2):(coords(i,2)+sT(2)-1),...
-            coords(i,3):(coords(i,3)+sT(3)-1) ) = h;
-    
-    
     % Save the support of the Signal
-    suppSignal( coords(i,1):(coords(i,1)+sT(1)-1), coords(i,2):(coords(i,2)+sT(2)-1),...
-                coords(i,3):(coords(i,3)+sT(3)-1),i) =  1;
+    suppSignal(coords(i,1):(coords(i,1)+sT(1)-1), coords(i,2):(coords(i,2)+sT(2)-1), coords(i,3):(coords(i,3)+sT(3)-1),i) =  1;
 end
 
 clear h1 h2 h3 h sT tmp i
@@ -154,17 +139,12 @@ set(gca, 'fontsize', 20)
 %% Simulation of FDR and Power for theoretical situation
 sf = size(f);
 % Initialize discoveries
-FalseDiscovery = zeros([ length(SNRvec) 4, Msim]);
-TrueDiscovery  = zeros([ nPeaks length(SNRvec) 4, Msim]);
-Q              = zeros([ length(SNRvec) 4 Msim]);
+FalseDiscovery = zeros([ length(SNRvec) 4]);
+TrueDiscovery  = zeros([nPeaks length(SNRvec) 4]);
 
 % Compute amplitude so that SNR matches the specifications
-if strcmp(Supp_name, 'MatchFilter')
-    A         = SNRvec;
-else
-    signalMax = sort(signalMax);
-    A         = SNRvec / signalMax( 2 );
-end
+signalMax = sort(signalMax);
+A         = SNRvec / signalMax( 2 );
 
 tic
     for ii = 1:length(SNRvec)
@@ -180,22 +160,22 @@ tic
                 error('specify correct data generation type. ("T" or "Z")')
             end
             % compute the p-values for different methods
-            [Z, Loc ]= find_locMax( Z, thresh );
+            [Z, loc ]= find_locMax( Z, thresh );
             
             % sort the values of Z to obtain sorted p-values later
             [Z, II] = sort(Z, 'descend');
-            Loc = Loc(II);
+            loc = loc(II);
             
             for ll = 1:4
                 switch ll
                     case 1
-                        Ps  = Table_peakFDR( Z, D, thresh, 0.05, pValueTable, Loc );                    
+                        Ps  = Table_peakFDR( Z, D, thresh, 0.05, pValueTable, loc );                    
                     case 2
-                        Ps  = Adler_peakFDR( Z, D, thresh, 0.05, Loc );
+                        Ps  = Adler_peakFDR( Z, D, thresh, 0.05, loc );
                     case 3
-                        Ps  = SPM_peakFDR( 0.05, [N N], STAT, R, 1, Z, thresh, Loc );
+                        Ps  = SPM_peakFDR( 0.05, [N N], STAT, R, 1, Z, thresh, loc );
                     case 4
-                        Ps  = Chumbley_peakFDR( Z, D, thresh, 0.05, STAT, N, Loc );
+                        Ps  = Chumbley_peakFDR( Z, D, thresh, 0.05, STAT, N, loc );
                 end
                 % Find FDR threshold 
                 S = length(Ps);
@@ -213,30 +193,24 @@ tic
                     truePeak = 0;
                     for kk = 1:nPeaks
                         V = suppSignal(:,:,:,kk);
-                        if V(Loc(k)) && ~p_detect(kk)
-                            TrueDiscovery(kk,ii,ll, i) = TrueDiscovery(kk,ii,ll, i) + 1;
-                            truePeak                   = 1;
-                            p_detect(kk)               = 1;
+                        if V(loc(k)) && ~p_detect(kk)
+                            TrueDiscovery(kk,ii,ll) = TrueDiscovery(kk,ii,ll) + 1;
+                            truePeak                = 1;
+                            p_detect(kk)            = 1;
                         end
                     end
 
                     % If the detected peak is not in the support of the true peaks
                     % count it as a False discovery
                     if ~truePeak
-                        FalseDiscovery(ii,ll, i) = FalseDiscovery(ii,ll, i) + 1;
+                        FalseDiscovery(ii,ll) = FalseDiscovery(ii,ll) + 1;
                     end
-                end
-                if ~isempty(Idetect)
-                    Q(ii,ll,i) = FalseDiscovery(ii,ll,i) / ( FalseDiscovery(ii,ll,i) +...
-                                    squeeze(sum(TrueDiscovery(:,ii,ll,i),1)) );
-                else
-                    Q(ii,ll,i) = 0;
                 end
             end
         end
     end
 
-    clear I Idetect k kk i ii ll Ps S signalMax f truePeak Z V Loc
+    clear I Idetect k kk i ii ll Ps S signalMax suppSignal truePeak Z V f loc
 toc
 
 %load('C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\simulations\FDR_Power_TheoryIsotropicGauss.mat')
@@ -244,6 +218,4 @@ toc
 FDR     = FalseDiscovery ./ ( squeeze(sum(TrueDiscovery,1)) + FalseDiscovery );
 avPower = squeeze(mean(TrueDiscovery,1) / Msim);
 
-mean(Q,3)
-
-%save(strcat('simulations/FieldTYPE_',fieldTYPE, num2str(N), '_Supp',Supp_name,'_std',num2str(stddev(1)),num2str(stddev(2)),num2str(stddev(3)),'_thresh',num2str(thresh),'_FDR_Power_TheoryIsotropicGauss.mat'));
+save(strcat('FieldTYPE_',fieldTYPE, num2str(N), '_Supp',Supp_name,'_std',num2str(stddev(1)),num2str(stddev(2)),num2str(stddev(3)),'_thresh',num2str(thresh),'_FDR_Power_TheoryIsotropicGauss.mat'));

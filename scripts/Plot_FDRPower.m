@@ -80,7 +80,7 @@ saveas( gcf, strcat('\pics\FieldTYPE_Z_Msim',num2str(Msim),'_GaussIsotropicAvPow
 
 
 %% %%%% FDR and Power dependence on thresholds 
-cd C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection
+cd /home/drtea/Research/MatlabPackages/STEM
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
 
 % Plot FDR curves
@@ -147,7 +147,7 @@ cd C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
 
 %file_name = 'FieldTYPE_T200_SuppSmall_std555_thresh2.5_FDR_Power_TheoryIsotropicGauss';
-%file_name = 'FieldTYPE_Z_SuppLarge_std555_thresh2.5_FDR_Power_TheoryIsotropicGauss';
+file_name = 'FieldTYPE_Z_SuppLarge_std555_thresh2.5_FDR_Power_TheoryIsotropicGauss';
 file_name = 'FieldTYPE_Z_SuppSmall_std777_thresh2_FDR_Power_TheoryIsotropicGauss';
 load(strcat(file_name,'.mat'))
 avPower = squeeze(avPower);

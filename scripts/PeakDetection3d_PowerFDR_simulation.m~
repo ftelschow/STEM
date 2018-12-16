@@ -227,8 +227,8 @@ tic
                     end
                 end
                 if ~isempty(Idetect)
-                    Q(ii,ll,i) = FalseDiscovery(ii,ll,i) / ( FalseDiscovery(ii,ll,i) +...
-                                    squeeze(sum(TrueDiscovery(:,ii,ll,i),1)) );
+                    Q(ii,ll,i) = FalseDiscovery(ii,ll) / ( FalseDiscovery(ii,ll) +...
+                                    squeeze(sum(TrueDiscovery(:,ii,ll),1)) );
                 else
                     Q(ii,ll,i) = 0;
                 end
@@ -236,7 +236,7 @@ tic
         end
     end
 
-    clear I Idetect k kk i ii ll Ps S signalMax f truePeak Z V Loc
+    clear I Idetect k kk i ii ll Ps S signalMax suppSignal f truePeak Z V Loc
 toc
 
 %load('C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection\simulations\FDR_Power_TheoryIsotropicGauss.mat')
