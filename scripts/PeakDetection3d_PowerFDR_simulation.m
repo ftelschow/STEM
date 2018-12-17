@@ -175,7 +175,7 @@ for thresh = threshvec
                 else
                     error('specify correct data generation type. ("T" or "Z")')
                 end
-                % compute the p-values for different methods
+                % find the local maxima above the threshold
                 [Z, Loc ]= find_locMax( Z, thresh );
 
                 % sort the values of Z to obtain sorted p-values later
@@ -194,7 +194,7 @@ for thresh = threshvec
                         case 2
                             Ps = Adler_peakFDR( Z, D, thresh, 0.05, Loc );
                         case 3
-                            Ps = SPM_peakFDR( 0.05, [N N], STAT, R, 1, Z, thresh, Loc );
+                            Ps = SPM_peakFDR( 0.05, [N-1 N-1], STAT, R, 1, Z, thresh, Loc );
                         case 4
                             Ps = Chumbley_peakFDR( Z, D, thresh, 0.05, STAT, N, Loc );
                     end
