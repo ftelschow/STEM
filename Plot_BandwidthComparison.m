@@ -28,24 +28,25 @@ figure(1); clf; hold on;
                  'kappa',num2str(kappavec(i)),'.mat' ))            
         end
         [ FF, X, FLO, FUP  ] = ecdf(pval);
-        plot(X, FF, colorvec(i),'linewidth', 1.5)
+        plot(X, FF, colorvec(i),'linewidth', 2)
     end
     
-    plot([0 1], [0 1], 'k--', 'linewidth', 1.5), hold off
+    plot([0 1], [0 1], 'k--', 'linewidth', 2), hold off
     
     % Change axis style
     if squareAxis
         axis square
     end
+    set(gca,'FontSize',sfont)
     xvec      = [0, 0.01, 0.02, 0.03, 0.04, 0.05];
     xtickcell = {'0', '0.01', '0.02', '0.03', '0.04', '0.05'};
     xlim([0, 0.05]), ylim([0, 0.05])
     xticks(xvec)
     xticklabels(xtickcell)
     
-    h = xlabel('p-value'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
-    h = ylabel('empirical cdf'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
-    set(gca, 'fontsize', 24);
+    h = xlabel('p-value', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
+    h = ylabel('empirical cdf', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
+
     if ErrorField(1)=='i'
         if(length(kappavec)==4)
             legend( 'FWHM=17', 'FWHM=12', 'FWHM=7', 'FWHM=4','Uniform', 'Location', 'northwest' );
@@ -56,6 +57,11 @@ figure(1); clf; hold on;
         legend( 'FWHM=[21,12,17]', 'FWHM=[17,7,12]', 'FWHM=[12,4,7]','Uniform', 'Location', 'northwest' );
     end
     set(legend, 'fontsize', sfont);
-
-saveas( gcf, strcat(path_folder, data_flag, '_Bandwidthcomp_ecdf.png') )
+       
+    kappaname = [];
+    for i=1:length(kappavec)
+       kappaname =  strcat(kappaname, num2str(kappavec(i)));
+    end
+    
+saveas( gcf, strcat(path_folder, data_flag,'kappa',kappaname, '_Bandwidthcomp_ecdf.png') )
 hold off

@@ -47,15 +47,14 @@ figure(1), clf; hold on;
     
     % Plot zero vertical line showing translation
     plot([0 0], [-20 20], '--k')
-    
+    set(gca,'FontSize',sfont)
     % Change axis style
     xlim([-1, 5])
-    h = xlabel('$$u$$'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
+    h = xlabel('$$u$$', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
     ylim([0 0.6])
-    h = ylabel('probability density'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
+    h = ylabel('probability density', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
     
-    % Modify fontsize and linewidths in all of the plots
-    set(gca, 'fontsize', sfont)
+    % Modify linewidths in all of the plots
     set(findall(gca, 'Type', 'Line'),'LineWidth',2);
 
 saveas( gcf, strcat(path_folder,erase(path_sim,'.mat') ,'_hist.png') )
