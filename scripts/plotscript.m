@@ -7,22 +7,27 @@
 %%% change directory to one above
 cd ..
 
-sfont      = 26;
+sfont      = 28;
 squareAxis = 1;
-WidthFig   = 800;
-HeightFig  = 800;
+WidthFig   = 750;
+HeightFig  = 750;
 
 %%% Plot the T simulations
 A = importdata('Tsimulations.txt');
 for i = 1:length(A)
-  Plot_T(A{i}, sfont, WidthFig, HeightFig, squareAxis)  
+  Plot_T( A{i}, sfont, WidthFig, HeightFig, squareAxis )
 end
 
+%%% Plot the T simulations
+A = importdata('Zsimulations.txt');
+for i = 1:length(A)
+  Plot_T( A{i}, sfont, WidthFig, HeightFig, squareAxis )
+end
 
 %%% Plot the histograms for Z-fields
 A = importdata('Histsimulations.txt');
 for i = 1:length(A)
-  Plot_Hist(A{i}, sfont, WidthFig, HeightFig)  
+  Plot_Hist( A{i}, sfont, WidthFig, HeightFig )
 end
 
 %%% Plot bandwidth comparison
