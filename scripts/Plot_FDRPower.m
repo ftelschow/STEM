@@ -21,40 +21,79 @@
 %%% Ensure that workspace is clean
 clear all
 close all
-
-%%% change directory to 
-%cd C:\Users\ftelschow\Documents\Linux\Research\MatlabCode\PeakDetection
+WidthFig  = 800;
+HeightFig = 600;
+sfont     = 26;
+%% %%% FDR and Power dependence on support and smoothness
+% Change the axis and legend interpreter to latex font
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
 
-%% %%% FDR and Power dependence on support and smoothness
 %%% Plot FDR curve
 figure(1), clf, hold on
-load('simulations\FieldTYPE_Z_SuppSmall_std555_thresh2.5_FDR_Power_TheoryIsotropicGauss.mat')
+    set(gcf, 'Position', [ 300 300 WidthFig HeightFig]);
+    set(gca, 'fontsize', sfont);
+    
+load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh-20_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'blue', 'linewidth', 1.5)
-suppp = supp+supp-1;
-tq1 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
+tq1 = tqBound;
+    volPeakSupp = 0;
+    for k =1:nPeaks
+        volPeakSupp = volPeakSupp + prod(2*supp(k,:)-1);
+    end
 
-load('simulations\FieldTYPE_Z_SuppLarge_std555_thresh2.5_FDR_Power_TheoryIsotropicGauss.mat')
-plot(SNRvec, FDR(:,1), 'cyan', 'linewidth', 1.5)
+    % Compute the theoretical bound for FDR
+    if thresh > -20
+        tq1 = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, thresh, kappa );
+    else
+        tq1 = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa );
+    end
 
-load('simulations\FieldTYPE_Z_SuppSmall_std777_thresh2.5_FDR_Power_TheoryIsotropicGauss.mat')
+load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh-20_SuppMatch_FDRPower.mat')
+plot(SNRvec, FDR(:,1), 'green', 'linewidth', 1.5)
+tq2 = tqBound;
+    volPeakSupp = 0;
+    for k =1:nPeaks
+        volPeakSupp = volPeakSupp + prod(2*supp(k,:)-1);
+    end
+
+    % Compute the theoretical bound for FDR
+    if thresh > -20
+        tq2 = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, thresh, kappa );
+    else
+        tq2 = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa );
+    end
+
+
+load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss777kappa1_prethresh-20_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'red', 'linewidth', 1.5)
-suppp = supp+supp-1;
-tq2 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
+tq3 = tqBound;
+    volPeakSupp = 0;
+    for k =1:nPeaks
+        volPeakSupp = volPeakSupp + prod(2*supp(k,:)-1);
+    end
 
-load('simulations\FieldTYPE_Z_SuppLarge_std777_thresh2.5_FDR_Power_TheoryIsotropicGauss.mat')
-plot(SNRvec, FDR(:,1), 'm', 'linewidth', 1.5)
+    % Compute the theoretical bound for FDR
+    if thresh > -20
+        tq3 = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, thresh, kappa );
+    else
+        tq3 = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa );
+    end
+plot([2 7], [-0.5 -0.5], ':k', 'linewidth', 2)
+plot([2 7], [0.05 0.05], '--k', 'linewidth', 2)
+plot([2 7], [tq1 tq1],':b', 'linewidth', 2)
+plot([2 7], [tq2 tq2],':g', 'linewidth', 2)
+plot([2 7], [tq3 tq3],':r', 'linewidth', 2)
+plot([2 7], [0.05 0.05], '--k', 'linewidth', 2)
 
-plot([3 7], [tq1 tq1],':k', 'linewidth', 2)
-plot([3 7], [tq2 tq2],':k', 'linewidth', 2)
-plot([3 7], [0.05 0.05], '--k', 'linewidth', 2)
+xlim([2 7])
+ylim([0 0.052])
 
-legend( 'Small Support, std 5', 'Large Support, std 5', 'Small Support, std 7', 'Large Support, std 7', 'theoretical FDR-q' );
-xlabel('SNR'); set(gca, 'fontsize', 20);
-ylabel('FDR')
+legend( 'FWHM = 7', 'FWHM = 12', 'FWHM = 17', 'theoretical FDR-q' );
+h = xlabel('SNR'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
+h = ylabel('FDR'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
 hold off;
-saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_std777_GaussIsotropicFDR_SuppSmoothComp.png' ) )
-
+%saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_std777_GaussIsotropicFDR_SuppSmoothComp.png' ) )
+%%
 %%% Plot average Power curves
 figure(2), clf, hold on
 load('FieldTYPE_Z_SuppSmall_std555_thresh2.5_FDR_Power_TheoryIsotropicGauss.mat')

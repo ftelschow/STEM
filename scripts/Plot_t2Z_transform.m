@@ -34,19 +34,21 @@ for bandwidth = [3 5 7]
                     F = F(2:end);
                     x = x(2:end);
                 end
-                plot(x,F, 'color', colorvec(count), 'linewidth', 1.5);
+                plot(x,F, 'color', colorvec(count), 'linewidth', 2);
 
             end
 
             % Plot uniform
-            plot([-10 10], [-10 10], '--k', 'linewidth', 1.5);
+            plot([-10 10], [-10 10], '--k', 'linewidth', 2);
 
             % Change axis style
             xvec      = [0, 0.01, 0.02, 0.03, 0.04, 0.05];
             xtickcell = {'0', '0.01', '0.02', '0.03', '0.04', '0.05'};
+            set(gca,'FontSize',sfont)
+
             if logPlot
                 xlim([-3.5, log10(1) ]), ylim([-3.5, log10(1) ])
-                plot([log10(0.05) log10(0.05)], [-10 10], '--k', 'linewidth', 1.5);
+                plot([log10(0.05) log10(0.05)], [-10 10], '--k', 'linewidth', 2);
                 h = xlabel('log10(p-value)'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
                 h = ylabel('log10(empirical cdf)'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
                 set(gca, 'fontsize', sfont);
@@ -54,9 +56,8 @@ for bandwidth = [3 5 7]
                 xlim([0, 0.05]), ylim([0, 0.05])
                 xticks(xvec)
                 xticklabels(xtickcell)
-                h = xlabel('p-value'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
-                h = ylabel('empirical cdf'); set(h, 'Interpreter', 'latex', 'fontsize', sfont);
-                set(gca, 'fontsize', sfont);
+                h = xlabel('p-value', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
+                h = ylabel('empirical cdf', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
             end
             if squareAxis
                 axis square
