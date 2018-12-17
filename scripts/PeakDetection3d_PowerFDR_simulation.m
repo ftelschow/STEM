@@ -259,9 +259,9 @@ for thresh = threshvec
 
     % Compute the theoretical bound for FDR
     if thresh > -20
-        tqBound = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa );
-    else
         tqBound = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, thresh, kappa );
+    else
+        tqBound = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa );
     end
 
     % Compute stdev tag
