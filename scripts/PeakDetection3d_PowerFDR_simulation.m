@@ -39,9 +39,9 @@ if strcmp(machine, 'server')
     cd /home/ftelschow/PeakDetection/simulations/;
 
 else
-    % data_name = 'isoL505030nsim1n12000_gauss_stddev5.mat';
-      data_name = 'isoL505030nsim12000n1_gauss_stddev7.mat';
-%       data_name = 'isoL505030nsim10000n1_gauss_stddev3.mat';
+%     data_name = 'isoL505030nsim1n12000_gauss_stddev5.mat';
+%     data_name = 'isoL505030nsim12000n1_gauss_stddev7.mat';
+    data_name = 'isoL505030nsim10000n1_gauss_stddev3.mat';
 %     data_name = 'isoL505030nsim1000n1_quartic_stddev18.mat';
 %     data_name = 'isoL505030nsim1000n1_quartic_stddev16.mat';
 %     data_name = 'isoL505030nsim1000n1_quartic_stddev12.mat';
@@ -54,8 +54,8 @@ end
 load( path_data );
 clear pool_num load_data
 
-fieldTYPE = 'Z';       % 'T'; %
-STAT      = 'Z';       % Type of statistic maxima are evaluated on (CS only supports 'Z')
+fieldTYPE = 'Z'; % 'T'; %
+STAT      = 'Z'; % 'T'; %      % Type of statistic maxima are evaluated on (CS only supports 'Z')
 
 %%% Simulation specifications
 % number of simulations
@@ -63,7 +63,7 @@ Msim = 1e4;
 % Vector of considered sample sizes in the T situation
 N = 20;
 % threshold for peaks
-threshvec =  [-20]; % 2 2.5, 3];
+threshvec = [ 2 2.5, 3];
 % FDR level
 q = 0.05;
 % SNR levels for peaks
@@ -80,7 +80,7 @@ clear dim1
 
 %%% Signal bump specifications
 % half support of bumps
-Supp_name =  'Match'; %'Small'; % 'Large'; %  'MatchFilter'; %
+Supp_name =  'Match'; % 'Small'; %'Large'; %  'MatchFilter'; %
 if strcmp(Supp_name,'Small')
     supp   = [ [5 8 5]; [5 7 7 ]; [5 6 5 ] ];
 elseif strcmp(Supp_name,'Large')
@@ -148,7 +148,7 @@ set(gca, 'fontsize', 20)
 %%
 for thresh = threshvec
     % compute pValue table
-    pValueTable = PvalueTable_heightDistr( 3, kappa, 1e-3, -3, 7);
+    pValueTable = PvalueTable_heightDistr( D, kappa, 1e-3, -3, 7);
     % make it the distribution of the overshoot.
     pValueTable(:,2) = pValueTable(:,2) / pValueTable(find(pValueTable(:,1) >=thresh,1,'first'),2);
     
@@ -248,8 +248,8 @@ for thresh = threshvec
     toc
 
     % Compute the summarising statistics
-    FDR     = mean( Q, 3 );
-    avPower = mean( P, 3 );
+    FDR     = mean( Q, 3 )
+    avPower = mean( P, 3 )
 
     % Compute volume of peak support
     volPeakSupp = 0;
@@ -259,9 +259,9 @@ for thresh = threshvec
 
     % Compute the theoretical bound for FDR
     if thresh > -20
-        tqBound = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, thresh, kappa );
+        tqBound = trueFDRcontrol( q, D, stddev(1), prod(dim-1), volPeakSupp, nPeaks, thresh, kappa )
     else
-        tqBound = trueFDRcontrol( q, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa );
+        tqBound = trueFDRcontrol( q, D, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa )
     end
 
     % Compute stdev tag
