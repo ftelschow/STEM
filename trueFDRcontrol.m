@@ -1,4 +1,4 @@
-function [ alpha ] = trueFDRcontrol( alpha, stddev, S, truePeakS, nTruePeaks, v, kappa )
+function [ alpha ] = trueFDRcontrol( alpha, D, stddev, S, truePeakS, nTruePeaks, v, kappa )
 %__________________________________________________________________________
 % Computes the asymptotic true level of FDR control for a Gaussian process
 % derived from smoothing white noise over a 3D domain with Gaussian
@@ -6,8 +6,9 @@ function [ alpha ] = trueFDRcontrol( alpha, stddev, S, truePeakS, nTruePeaks, v,
 %
 % Input:
 %   alpha      -  level of FDR control
+%   D          -  dimension of the domain
 %   stddev     -  standard deviation in the Gaussian covariance
-%   S          -  mask of the domain of the field
+%   S          -  volume of the domain of the field
 %   truePeakS  -  volume of the true peak support
 %   nTruePeaks -  number of true peaks
 %   v          -  if provided compute correction for the overshoot above v
@@ -35,7 +36,6 @@ if nargin < 7
     kappa = 1;
 end
 
-D = length(size(S));
 rho_quot = (2*stddev)^(-2);
 
 % volume of true null hypothesis 
