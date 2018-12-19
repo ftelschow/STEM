@@ -49,12 +49,12 @@ figure(1); clf; hold on;
 
     if ErrorField(1)=='i'
         if(length(kappavec)==4)
-            legend( 'FWHM=17', 'FWHM=12', 'FWHM=7', 'FWHM=4','Uniform', 'Location', 'northwest' );
+            legend( 'FWHM=17', 'FWHM=12', 'FWHM=7', 'FWHM=4', 'Location', 'northwest' );
         else
-            legend( 'FWHM=17', 'FWHM=12', 'FWHM=7','Uniform', 'Location', 'northwest' );        
+            legend( 'FWHM=17', 'FWHM=12', 'FWHM=7', 'Location', 'northwest' );        
         end
     else
-        legend( 'FWHM=[21,12,17]', 'FWHM=[17,7,12]', 'FWHM=[12,4,7]','Uniform', 'Location', 'northwest' );
+        legend( 'FWHM=[21,12,17]', 'FWHM=[17,7,12]', 'FWHM=[12,4,7]', 'Location', 'northwest' );
     end
     set(legend, 'fontsize', sfont);
        

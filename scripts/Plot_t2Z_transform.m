@@ -63,7 +63,7 @@ for bandwidth = [3 5 7]
                 axis square
             end
 
-            legend( '$$N=50$$', '$$N=100$$', '$$N=200$$','Uniform', 'Location', 'southeast' );
+            legend( '$$N=50$$', '$$N=100$$', '$$N=200$$', 'Location', 'southeast' );
             set(legend, 'fontsize', sfont);
 
         hold off;

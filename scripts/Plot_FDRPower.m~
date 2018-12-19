@@ -31,8 +31,7 @@ WidthFig   = 800;
 HeightFig  = 600;
 linewidth  = 2;
 
-%% %%% FDR and Power dependence on smoothness
-xbound = [2 7];
+%% %%% FDR and Power dependence on support and smoothness
 % Change the axis and legend interpreter to latex font
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
 %%% Plot FDR curve
@@ -43,23 +42,55 @@ figure(1), clf, hold on
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh-20_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'blue', 'linewidth', linewidth)
 tq1 = tqBound;
+    volPeakSupp = 0;
+    for k =1:nPeaks
+        volPeakSupp = volPeakSupp + prod(2*supp(k,:)-1);
+    end
+
+    % Compute the theoretical bound for FDR
+    if thresh > -20
+        tq1 = trueFDRcontrol( q, D, stddev(1), prod(dim-1), volPeakSupp, nPeaks, thresh, kappa );
+    else
+        tq1 = trueFDRcontrol( q, D, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa );
+    end
 
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh-20_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'green', 'linewidth', linewidth)
 tq2 = tqBound;
+    volPeakSupp = 0;
+    for k =1:nPeaks
+        volPeakSupp = volPeakSupp + prod(2*supp(k,:)-1);
+    end
+
+    % Compute the theoretical bound for FDR
+    if thresh > -20
+        tq2 = trueFDRcontrol( q, D, stddev(1), prod(dim-1), volPeakSupp, nPeaks, thresh, kappa );
+    else
+        tq2 = trueFDRcontrol( q, D, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa );
+    end
+
 
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss777kappa1_prethresh-20_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'red', 'linewidth', linewidth)
 tq3 = tqBound;
+    volPeakSupp = 0;
+    for k =1:nPeaks
+        volPeakSupp = volPeakSupp + prod(2*supp(k,:)-1);
+    end
 
-plot(xbound, [-0.5 -0.5], ':k', 'linewidth', linewidth)
-plot(xbound, [0.05 0.05], '--k', 'linewidth', linewidth)
-plot(xbound, [tq1 tq1],':b', 'linewidth', linewidth)
-plot(xbound, [tq2 tq2],':g', 'linewidth', linewidth)
-plot(xbound, [tq3 tq3],':r', 'linewidth', linewidth)
-plot(xbound, [0.05 0.05], '--k', 'linewidth', linewidth)
+    % Compute the theoretical bound for FDR
+    if thresh > -20
+        tq3 = trueFDRcontrol( q, D, stddev(1), prod(dim-1), volPeakSupp, nPeaks, thresh, kappa );
+    else
+        tq3 = trueFDRcontrol( q, D, stddev(1), prod(dim-1), volPeakSupp, nPeaks, -666, kappa );
+    end
+plot([2 7], [-0.5 -0.5], ':k', 'linewidth', linewidth)
+plot([2 7], [0.05 0.05], '--k', 'linewidth', linewidth)
+plot([2 7], [tq1 tq1],':b', 'linewidth', linewidth)
+plot([2 7], [tq2 tq2],':g', 'linewidth', linewidth)
+plot([2 7], [tq3 tq3],':r', 'linewidth', linewidth)
+plot([2 7], [0.05 0.05], '--k', 'linewidth', linewidth)
 
-set(gca,'FontSize',sfont)
 xlim([2 7])
 ylim([0 0.052])
 h = xlabel('SNR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
@@ -71,7 +102,7 @@ set(legend, 'fontsize', sfont);
 hold off;
 
 % save the figure
-saveas( gcf, strcat('pics/FieldTYPE_Z_Msim',num2str(Msim),'_GaussIsotropicFDR_SmoothComp.png' ) )
+saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_std777_GaussIsotropicFDR_SuppSmoothComp.png' ) )
 
 
 %%%%%%%%%%%%%% Plot average Power curves
@@ -88,8 +119,7 @@ plot(SNRvec, avPower(:,1), 'green', 'linewidth', linewidth)
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss777kappa1_prethresh-20_SuppMatch_FDRPower.mat')
 plot(SNRvec, avPower(:,1), 'red', 'linewidth', linewidth)
 
-set(gca,'FontSize',sfont)
-xlim(xbound)
+xlim([2 7])
 ylim([0 1])
 h = xlabel('SNR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
 h = ylabel('Detection Power', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
@@ -99,11 +129,10 @@ set(legend, 'fontsize', sfont);
 hold off;
 
 % save the figure
-saveas( gcf, strcat('pics/FieldTYPE_Z_Msim',num2str(Msim),'_GaussIsotropicAvPower_SmoothComp.png' ))
+saveas( gcf, strcat('\pics\FieldTYPE_Z_Msim',num2str(Msim),'_GaussIsotropicAvPower_SuppSmoothComp.png' ))
 
 
 %% %%%% FDR and Power dependence on thresholds bandwidth=3
-xbound = [2 7];
 % Change the axis and legend interpreter to latex font
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
 %%% Plot FDR curve
@@ -127,16 +156,15 @@ load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh3_SuppM
 plot(SNRvec, FDR(:,1), 'green', 'linewidth', linewidth)
 tq4 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
 
-plot(xbound, [-20 -20],':k', 'linewidth', linewidth)
-plot(xbound, [tq1 tq1],':r', 'linewidth', linewidth)
-plot(xbound, [tq2 tq2],':c', 'linewidth', linewidth)
-plot(xbound, [tq3 tq3],':b', 'linewidth', linewidth)
-plot(xbound, [tq4 tq4],':g', 'linewidth', linewidth)
-plot(xbound, [0.05 0.05], '--k', 'linewidth', linewidth)
+plot([3 7], [-20 -20],':k', 'linewidth', linewidth)
+plot([3 7], [tq1 tq1],':r', 'linewidth', linewidth)
+plot([3 7], [tq2 tq2],':c', 'linewidth', linewidth)
+plot([3 7], [tq3 tq3],':b', 'linewidth', linewidth)
+plot([3 7], [tq4 tq4],':g', 'linewidth', linewidth)
+plot([3 7], [0.05 0.05], '--k', 'linewidth', linewidth)
 
-set(gca,'FontSize',sfont)
-xlim(xbound)
-ylim([0 0.052])
+xlim([2 7])
+ylim([0 1])
 h = xlabel('SNR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
 h = ylabel('FDR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
 
@@ -162,8 +190,7 @@ plot(SNRvec, avPower(:,1), 'blue', 'linewidth', linewidth)
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh3_SuppMatch_FDRPower.mat')
 plot(SNRvec, avPower(:,1), 'green', 'linewidth', linewidth)
 
-set(gca,'FontSize',sfont)
-xlim(xbound)
+xlim([2 7])
 ylim([0 1])
 h = xlabel('SNR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
 h = ylabel('Detection Power', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
@@ -173,11 +200,10 @@ set(legend, 'fontsize', sfont);
 hold off;
 
 % save the figure
-saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_SuppMatch_std333_GaussIsotropicAvPower_OvershootComp.png' ) )
+saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_SuppSmall_std333_GaussIsotropicAvPower_OvershootComp.png' ) )
 
 
 %% %%%% FDR and Power dependence on thresholds bandwidth=5
-xbound = [2 7];
 % Change the axis and legend interpreter to latex font
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
 %%% Plot FDR curve
@@ -187,35 +213,34 @@ figure(1), clf, hold on
     
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh-20_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'red', 'linewidth', linewidth)
-tq1 = tqBound;
+tq1 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
 
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh2_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'cyan', 'linewidth', linewidth)
-tq2 = tqBound;
+tq2 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
 
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'blue', 'linewidth', linewidth)
-tq3 = tqBound;
+tq3 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
 
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh3_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'green', 'linewidth', linewidth)
-tq4 = tqBound;
+tq4 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
 
-plot(xbound, [-20 -20],':k', 'linewidth', linewidth)
-plot(xbound, [tq1 tq1],':r', 'linewidth', linewidth)
-plot(xbound, [tq2 tq2],':c', 'linewidth', linewidth)
-plot(xbound, [tq3 tq3],':b', 'linewidth', linewidth)
-plot(xbound, [tq4 tq4],':g', 'linewidth', linewidth)
-plot(xbound, [0.05 0.05], '--k', 'linewidth', linewidth)
+plot([3 7], [-20 -20],':k', 'linewidth', linewidth)
+plot([3 7], [tq1 tq1],':r', 'linewidth', linewidth)
+plot([3 7], [tq2 tq2],':c', 'linewidth', linewidth)
+plot([3 7], [tq3 tq3],':b', 'linewidth', linewidth)
+plot([3 7], [tq4 tq4],':g', 'linewidth', linewidth)
+plot([3 7], [0.05 0.05], '--k', 'linewidth', linewidth)
 
-set(gca,'FontSize',sfont)
-xlim(xbound)
-ylim([0 0.052])
+xlim([2 7])
+ylim([0 1])
 h = xlabel('SNR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
 h = ylabel('FDR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
 
 legend( 'Height Distribution', 'Overshoot $v = 2$', 'Overshoot $v = 2.5$', 'Overshoot $v = 3$', 'theoretical FDR-q', 'Location', 'northeast' );
-set(legend, 'fontsize', sfont);
+set(legend, 'fontsize', fontsize);
 hold off;
 saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_SuppMatch_std555_GaussIsotropicFDR_OvershootComp.png' ) )
 
@@ -236,8 +261,7 @@ plot(SNRvec, avPower(:,1), 'blue', 'linewidth', linewidth)
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh3_SuppMatch_FDRPower.mat')
 plot(SNRvec, avPower(:,1), 'green', 'linewidth', linewidth)
 
-set(gca,'FontSize',sfont)
-xlim(xbound)
+xlim([2 7])
 ylim([0 1])
 h = xlabel('SNR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
 h = ylabel('Detection Power', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
@@ -247,24 +271,18 @@ set(legend, 'fontsize', sfont);
 hold off;
 
 % save the figure
-saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_SuppMatch_std555_GaussIsotropicAvPower_OvershootComp.png' ) )
+saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_SuppSmall_std555_GaussIsotropicAvPower_OvershootComp.png' ) )
 
 
 %% Plot FDR for the different methods
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
-xbounds = [2 7];
+xbounds = [3 7];
 
 fileVec = [
-            "FieldTYPE_T_N50Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
-            "FieldTYPE_T_N100Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
-            "FieldTYPE_T_N200Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
-            "FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh2_SuppMatch_FDRPower";
-            "FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
-            "FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh3_SuppMatch_FDRPower";
+            "FieldTYPE_Z_SuppLarge_std555_thresh2.5_FDR_Power_TheoryIsotropicGauss";
             ];
 
-for k = 1:length(fileVec)
-    file_name = char(fileVec(k));
+for file_name = fileVec
     % load the data
     load(strcat('simulations/',file_name,'.mat'))
 
@@ -274,17 +292,13 @@ for k = 1:length(fileVec)
     
     %%%%%%%%%%%%%% plot FDR curves
     figure(1), clf, hold on
-    set(gcf, 'Position', [ 300 300 WidthFig HeightFig]);
-    set(gca, 'fontsize', sfont);
-    
-    if strcmp(STAT, 'Z')
+    if ~strcmp(STAT, 'T')
         plot(SNRvec, FDR(:,3), 'red', 'linewidth', linewidth)
         plot(SNRvec, FDR(:,1), 'blue', 'linewidth', linewidth)
         plot(SNRvec, FDR(:,2), 'cyan', 'linewidth', linewidth)
     else
-        plot(SNRvec, FDR(:,3), 'red', 'linewidth', linewidth)
         plot(SNRvec, FDR(:,1), 'blue', 'linewidth', linewidth)
-
+        plot(SNRvec, FDR(:,3), 'red', 'linewidth', linewidth)
     end
         plot(SNRvec, FDR(:,4), 'green', 'linewidth', linewidth)
         
@@ -292,15 +306,14 @@ for k = 1:length(fileVec)
     plot(xbounds, [0.05 0.05],'--k', 'linewidth', linewidth)
 
     if strcmp(STAT, 'T')
-       legend( 'GKF Ratio (t-stat)', 'Exact (transform)', 'GKF1 Ratio (t-stat)', 'theoretical FDR-q', 'Location', 'northeast' );
+       legend( 'Exact Gaussian', 'SPM12 (t)', 'Chumbley (t)', 'theoretical FDR-q', 'Location', 'northeast' );
     else
-        legend(  'GKF Ratio (Gaussian)', 'Exact (Gaussian)', 'Adler (1981)', 'GKF1 Ratio (Gaussian)', 'theoretical FDR-q', 'Location', 'northeast' );
+        legend( 'SPM12', 'Exact Gaussian', 'Adler (1981)', 'Chumbley (2010)', 'theoretical FDR-q', 'Location', 'northeast' );
     end
     set(legend, 'fontsize', sfont);
-
-    set(gca,'FontSize', sfont)
+    
     xlim(xbounds)
-    ylim([0 0.052])
+    ylim([0 1])
     h = xlabel('SNR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
     h = ylabel('FDR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
     hold off;
@@ -308,35 +321,27 @@ for k = 1:length(fileVec)
     % save the figure
     saveas( gcf, strcat('pics/', file_name, '_FDR_allMethods.png' ))
 
-    %%%%%%%%%%%%%% plot average power curves
-    figure(2), clf, hold on
-    set(gcf, 'Position', [ 300 300 WidthFig HeightFig]);
-    set(gca, 'fontsize', sfont);
-    
-    if strcmp(STAT, 'Z')
-        plot(SNRvec, avPower(:,3), 'red', 'linewidth', linewidth)
-        plot(SNRvec, avPower(:,1), 'blue', 'linewidth', linewidth)
-        plot(SNRvec, avPower(:,2), 'cyan', 'linewidth', linewidth)
+    % plot average power curves
+    figure(4), clf, hold on
+    if ~strcmp(STAT, 'T')
+        plot(SNRvec, avPower(:,3), 'red', 'linewidth', 1.5)
+        plot(SNRvec, avPower(:,1), 'blue', 'linewidth', 1.5)
+        plot(SNRvec, avPower(:,2), 'cyan', 'linewidth', 1.5)
     else
-        plot(SNRvec, avPower(:,3), 'red', 'linewidth', linewidth)
-        plot(SNRvec, avPower(:,1), 'blue', 'linewidth', linewidth)
+        plot(SNRvec, avPower(:,1), 'blue', 'linewidth', 1.5)
+        plot(SNRvec, avPower(:,3), 'red', 'linewidth', 1.5)
     end
-    plot(SNRvec, avPower(:,4), 'green', 'linewidth', linewidth)
+    plot(SNRvec, avPower(:,4), 'green', 'linewidth', 1.5)
 
     if strcmp(STAT, 'T')
-       legend( 'GKF Ratio (t-stat)', 'Exact (transform)', 'GKF1 Ratio (t-stat)', 'Location', 'southeast' );
+       legend( 'Exact Gaussian', 'SPM12 (t)', 'Chumbley (t)', 'Location', 'southeast' );
     else
-        legend( 'GKF Ratio (Gaussian)', 'Exact (Gaussian)', 'Adler (1981)', 'GKF1 Ratio (Gaussian)', 'Location', 'southeast' );    
+        legend( 'SPM12', 'Exact Gaussian', 'Adler (1981)', 'Chumbley (2010)', 'Location', 'southeast' );    
     end
-    set(legend, 'fontsize', sfont);
 
-    set(gca,'FontSize',sfont)
-    xlim(xbounds)
-    ylim([0 1])
-    h = xlabel('SNR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
-    h = ylabel('Detection Power', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
+
+    xlabel('SNR'); set(gca, 'fontsize', 20);
+    ylabel('average Power')
     hold off;
-    
-    % save the figure
     saveas( gcf, strcat('pics\', file_name, '_avPower_allMethods.png' ))
 end

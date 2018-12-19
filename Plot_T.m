@@ -148,7 +148,7 @@ figure(1), clf; hold on;
         set(legend, 'fontsize', sfont);
     elseif T2Z
         %legend( 'SPM12 (Gaussian)', 'Exact (Gaussian)', 'Chumbley (Gaussian)','Uniform', 'Location', 'southeast' );
-        legend( 'GKF Ratio (Gaussian)', 'Exact (Gaussian)', 'GKF1 Ratio (Gaussian)', 'Location', 'northwest' );
+        legend( 'GKF Ratio (Gaussian)', 'Exact (transform)', 'GKF1 Ratio (Gaussian)', 'Location', 'northwest' );
         set(legend, 'fontsize', sfont);
     else
         %legend( 'Exact (Gaussian)', 'SPM12 (t-stat)','Chumbley (t-stat)','Uniform', 'Location', 'southeast' );
