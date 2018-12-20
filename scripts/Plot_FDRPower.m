@@ -113,19 +113,19 @@ figure(1), clf, hold on
     
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh-20_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'red', 'linewidth', linewidth)
-tq1 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
+tq1 = tqBound;
 
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh2_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'cyan', 'linewidth', linewidth)
-tq2 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
+tq2 = tqBound;
 
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh2.5_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'blue', 'linewidth', linewidth)
-tq3 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
+tq3 = tqBound;
 
 load('simulations/FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh3_SuppMatch_FDRPower.mat')
 plot(SNRvec, FDR(:,1), 'green', 'linewidth', linewidth)
-tq4 = trueFDRcontrol( 0.05, stddev(1), prod(dim-1), prod(suppp(:,1))+prod(suppp(:,2))+prod(suppp(:,3)), 3, thresh );
+tq4 = tqBound;
 
 plot(xbound, [-20 -20],':k', 'linewidth', linewidth)
 plot(xbound, [tq1 tq1],':r', 'linewidth', linewidth)
@@ -141,9 +141,9 @@ h = xlabel('SNR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
 h = ylabel('FDR', 'fontsize', sfont+10); set(h, 'Interpreter', 'latex');
 
 legend( 'Height Distribution', 'Overshoot $v = 2$', 'Overshoot $v = 2.5$', 'Overshoot $v = 3$', 'theoretical FDR-q', 'Location', 'northeast' );
-set(legend, 'fontsize', fontsize);
+set(legend, 'fontsize', sfont);
 hold off;
-saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_SuppMatch_std333_GaussIsotropicFDR_OvershootComp.png' ) )
+saveas( gcf, strcat('pics/FieldTYPE_Z_Msim',num2str(Msim),'_SuppMatch_std333_GaussIsotropicFDR_OvershootComp.png' ) )
 
 %%%%%%%%%%%%%% Plot average Power curves
 figure(2), clf, hold on
@@ -173,7 +173,7 @@ set(legend, 'fontsize', sfont);
 hold off;
 
 % save the figure
-saveas( gcf, strcat('pics\FieldTYPE_Z_Msim',num2str(Msim),'_SuppMatch_std333_GaussIsotropicAvPower_OvershootComp.png' ) )
+saveas( gcf, strcat('pics/FieldTYPE_Z_Msim',num2str(Msim),'_SuppMatch_std333_GaussIsotropicAvPower_OvershootComp.png' ) )
 
 
 %% %%%% FDR and Power dependence on thresholds bandwidth=5
@@ -255,12 +255,18 @@ set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegend
 xbounds = [2 7];
 
 fileVec = [
-            "FieldTYPE_T_N50Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
-            "FieldTYPE_T_N100Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
-            "FieldTYPE_T_N200Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
-            "FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh2_SuppMatch_FDRPower";
-            "FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
-            "FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh3_SuppMatch_FDRPower";
+%             "FieldTYPE_T_N50Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
+%             "FieldTYPE_T_N100Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
+%             "FieldTYPE_T_N200Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
+%             "FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh2_SuppMatch_FDRPower";
+%             "FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh2.5_SuppMatch_FDRPower";
+%             "FieldTYPE_Z_Msim10000_isotropicgauss555kappa1_prethresh3_SuppMatch_FDRPower";
+            "FieldTYPE_T_N50Msim10000_isotropicgauss333kappa1_prethresh2.5_SuppMatch_FDRPower";
+            "FieldTYPE_T_N100Msim10000_isotropicgauss333kappa1_prethresh2.5_SuppMatch_FDRPower";
+            "FieldTYPE_T_N200Msim10000_isotropicgauss333kappa1_prethresh2.5_SuppMatch_FDRPower";
+            "FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh2_SuppMatch_FDRPower";
+            "FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh2.5_SuppMatch_FDRPower";
+            "FieldTYPE_Z_Msim10000_isotropicgauss333kappa1_prethresh3_SuppMatch_FDRPower";
             ];
 
 for k = 1:length(fileVec)
