@@ -144,16 +144,16 @@ for D = [2 3]
     plot(ff, ff, 'b', 'linewidth', 2)
     [u, f] = fplot(@(u) approx_adler(u, v));
     f = interp1(u, f, uu);
-    plot(ff, f, 'c', 'linewidth', 2)
+    plot(f, ff, 'c', 'linewidth', 2)
     [u, f] = fplot(@(u) approx_stationary(u, v));
     f = interp1(u, f, uu);
-    plot(ff, f, 'g', 'linewidth', 2)
+    plot(f, ff, 'g', 'linewidth', 2)
     [u, f] = fplot(@(u) GKF(u, 'isotropic', D, L, zeta(1))/GKF(v, 'isotropic', D, L, zeta(1)));
     f = interp1(u, f, uu);
-    plot(ff, f, 'r', 'linewidth', 2)
+    plot(f, ff, 'r', 'linewidth', 2)
     [u, f] = fplot(@(u) GKF(u, 'isotropic', D, L, zeta(2))/GKF(v, 'isotropic', D, L, zeta(2)));
     f = interp1(u, f, uu);
-    plot(ff, f, 'r--', 'linewidth', 2)
+    plot(f, ff, 'r--', 'linewidth', 2)
     hold off
     toc % 6 sec. for D=2, 42 sec. for D=3
     
