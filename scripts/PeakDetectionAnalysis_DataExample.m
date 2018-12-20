@@ -70,7 +70,7 @@ D  = length(sY);
 % Processing choices
 smoothT    = 0;
 smoothData = 1;
-FWHM       = 2*sqrt(2*log(2))*2; % 2*sqrt(2*log(2))*1.6; %
+FWHM       =  2*sqrt(2*log(2))*1.6; % 1.6*sqrt(2*log(2))*2; %
 %% %%%% Preprocessing before data and compute T statistic
 % plot data
 figure(1)
@@ -349,7 +349,7 @@ save( strcat(path_data,'AnalysisMoran_FWHM_',num2str(FWHM),'.mat'), ...
     if( max(Iz)>ept || min(Iz)<spt )
         warn = "Not all signifikant peaks are shown!"
     end
-    figure; clf; camroll(3*90); hold on;
+    figure; clf; set(gcf, 'Position', [ 300 300 800 800]); camroll(3*90); hold on;
     RGB = anatomy(T_thresh(:,:,spt:ept), mY(:,:,spt:ept), [], 'hot');
     montage(permute(RGB, [1 2 4 3]), 'Size', [m m], 'ThumbnailSize',sY(1:2)), axis xy
 
@@ -366,6 +366,8 @@ save( strcat(path_data,'AnalysisMoran_FWHM_',num2str(FWHM),'.mat'), ...
     end
     hold on
     plot(Ix_montage, Iy_montage, '^b', 'LineWidth',1.2)
+set(gca,'box','off')
+    set(gca,'visible','off')
     hold off
     clear Ix_montage Iy_montage m Iz RGB smask_valid Ix Iy ll II
     saveas( gcf, strcat(path_pics,'activationMoran_SmoothT',num2str(smoothT),'_SmoothData', num2str(smoothData), '_FWHM_',num2str(FWHM),'_thresh_',num2str(Vvec(u)),'_',names_methods{methodNr},'.png') )

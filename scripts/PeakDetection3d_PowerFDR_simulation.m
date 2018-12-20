@@ -142,9 +142,18 @@ clear h1 h2 h3 h sT tmp i
 % clear i zvec
 
 % Plot projection of signal
-set(groot, 'defaultAxesTickLabelInterpreter','latex'); set(groot, 'defaultLegendInterpreter','latex');
-imagesc(sum(signal,3)), axis square
-set(gca, 'fontsize', 20)
+set(groot, 'defaultAxesTickLabelInterpreter','latex'); ...
+set(groot, 'defaultLegendInterpreter','latex'); clf; hold on;
+    % Define size and location of the figure [xPos yPos WidthFig HeightFig]
+    set(gcf, 'Position', [ 300 300 750 750]); axis square;
+    xvec      = [0, 0.01, 0.02, 0.03, 0.04, 0.05];
+    xtickcell = {'0', '0.01', '0.02', '0.03', '0.04', '0.05'};
+    imagesc(sum(signal,3))
+    xlim([1,50])
+    ylim([1,50])
+set(gca, 'fontsize', 28)
+saveas( gcf, 'pics/signal.png' )
+
 %%
 for thresh = threshvec
     % compute pValue table
