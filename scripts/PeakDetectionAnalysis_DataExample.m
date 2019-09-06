@@ -68,8 +68,8 @@ df = n - rank(X);
 D  = length(sY);
 
 % Processing choices
-smoothT    = 0;
-smoothData = 1;
+smoothT    = 1;
+smoothData = 0;
 FWHM       =  2*sqrt(2*log(2))*1.6; % 1.6*sqrt(2*log(2))*2; %
 %% %%%% Preprocessing before data and compute T statistic
 % plot data
@@ -297,8 +297,8 @@ end
 
 clear Idetect1 Idetect2 Idetect3 Idetect4 Idetect5 Fi S Ps1 Ps2 Ps3 Ps4 Ps5 pValueTable v u ts loc
 
-save( strcat(path_data,'AnalysisMoran_FWHM_',num2str(FWHM),'.mat'), ...
-      'kappa_est', 'R', 'Idetect', 'Ps', 'Ts', 'Loc' ,'c', 'Vvec', 'FWHM', 'smoothData', 'smoothT', 'T', 'mask', 'mY' )
+%save( strcat(path_data,'AnalysisMoran_FWHM_',num2str(FWHM),'.mat'), ...
+%      'kappa_est', 'R', 'Idetect', 'Ps', 'Ts', 'Loc' ,'c', 'Vvec', 'FWHM', 'smoothData', 'smoothT', 'T', 'mask', 'mY' )
 
 %% Plot the results
 % Loop over different methods and thresholds
@@ -438,3 +438,7 @@ input.tablePlacement='H';
 input.data = numSigPeaks;
 input.dataFormat = {'%.0f'};
 latex = latexTable(input);
+
+%%
+
+[LKC, EEC] = LKCestim_HermProj( residuals, 3, 1, 'gauss', 1, -6:0.02:6 )
